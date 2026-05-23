@@ -4,10 +4,17 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
+import com.paiban.helper.BuildConfig
 import com.paiban.helper.data.db.AppDatabase
+import com.paiban.helper.data.db.AiConfigDao
+import com.paiban.helper.data.repository.AiSettingsRepository
 import com.paiban.helper.data.repository.EditorRepository
 import com.paiban.helper.data.repository.SettingsRepository
 import com.paiban.helper.domain.analysis.ContentClassifier
+import com.paiban.helper.domain.ai.AiChatRepository
+import com.paiban.helper.domain.ai.DeepSeekClient
+import com.paiban.helper.domain.ai.DeepSeekConfig
+import com.paiban.helper.domain.ai.AiSecretCrypto
 import com.paiban.helper.domain.clipboard.ClipboardInspector
 import com.paiban.helper.domain.files.ImportExportManager
 import com.paiban.helper.domain.render.HtmlSanitizer
@@ -20,6 +27,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.io.File
 import javax.inject.Singleton
 
 @Module
@@ -29,7 +37,7 @@ object AppModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(context, AppDatabase::class.java, "paiban.db")
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .build()
     }
 
@@ -38,6 +46,9 @@ object AppModule {
 
     @Provides
     fun provideHistoryDao(database: AppDatabase) = database.historyDao()
+
+    @Provides
+    fun provideAiConfigDao(database: AppDatabase): AiConfigDao = database.aiConfigDao()
 
     @Provides
     @Singleton
@@ -60,6 +71,50 @@ object AppModule {
         dataStore: DataStore<Preferences>,
     ): SettingsRepository {
         return SettingsRepository(dataStore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAiSecretCrypto(): AiSecretCrypto = AiSecretCrypto()
+
+    @Provides
+    @Singleton
+    fun provideAiSettingsRepository(
+        aiConfigDao: AiConfigDao,
+        secretCrypto: AiSecretCrypto,
+    ): AiSettingsRepository {
+        return AiSettingsRepository(
+            dao = aiConfigDao,
+            crypto = secretCrypto,
+            builtInApiKey = BuildConfig.DEEPSEEK_API_KEY,
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeepSeekConfig(): DeepSeekConfig {
+        return DeepSeekConfig(
+            apiKeyValue = BuildConfig.DEEPSEEK_API_KEY,
+            model = DeepSeekConfig.DEFAULT_MODEL,
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeepSeekClient(
+        config: DeepSeekConfig,
+    ): DeepSeekClient = DeepSeekClient(config)
+
+    @Provides
+    @Singleton
+    fun provideAiChatRepository(
+        @ApplicationContext context: Context,
+        client: DeepSeekClient,
+    ): AiChatRepository {
+        return AiChatRepository(
+            storageDir = File(context.filesDir, "ai-chat"),
+            client = client,
+        )
     }
 
     @Provides

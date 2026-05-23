@@ -43,6 +43,11 @@ internal fun editorHomeSections(
 
 internal fun templateSelectionToApply(state: EditorUiState): String = state.pendingTemplateId
 
+enum class AiSuggestionApplyMode {
+    Replace,
+    Append,
+}
+
 class EditorStateReducer {
     private val undoStack = ArrayDeque<String>()
     private val redoStack = ArrayDeque<String>()
@@ -104,6 +109,32 @@ class EditorStateReducer {
                 content = updated,
                 selectionStart = start + prefix.length,
                 selectionEnd = start + prefix.length + selected.length,
+            )
+        )
+    }
+
+    fun applyAiSuggestion(
+        state: EditorUiState,
+        suggestion: String,
+        mode: AiSuggestionApplyMode,
+    ): EditorUiState {
+        val updated = when (mode) {
+            AiSuggestionApplyMode.Replace -> suggestion
+            AiSuggestionApplyMode.Append -> {
+                if (state.content.isBlank()) {
+                    suggestion
+                } else {
+                    state.content.trimEnd() + "\n\n" + suggestion.trimStart()
+                }
+            }
+        }
+        undoStack.addLast(state.content)
+        redoStack.clear()
+        return updateCapabilities(
+            state.copy(
+                content = updated,
+                selectionStart = updated.length,
+                selectionEnd = updated.length,
             )
         )
     }

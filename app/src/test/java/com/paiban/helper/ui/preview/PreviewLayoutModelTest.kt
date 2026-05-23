@@ -32,6 +32,7 @@ class PreviewLayoutModelTest {
         assertTrue(semantics.isScrollable)
         assertFalse(semantics.isEditable)
         assertTrue(semantics.isZoomable)
+        assertFalse(semantics.interceptsExploreByTouch)
     }
 
     @Test

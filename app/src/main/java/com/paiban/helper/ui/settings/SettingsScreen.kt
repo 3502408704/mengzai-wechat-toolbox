@@ -40,6 +40,24 @@ data class SettingsSectionUiModel(
     val rows: List<SettingsRowUiModel>,
 )
 
+data class AiConfigRowInput(
+    val id: Long,
+    val displayName: String,
+    val model: String,
+    val isBuiltIn: Boolean,
+    val apiKeyMasked: String? = null,
+)
+
+data class AiConfigRowUiModel(
+    val id: Long,
+    val title: String,
+    val subtitle: String,
+    val isReadOnly: Boolean,
+    val canDelete: Boolean,
+    val canRevealApiKey: Boolean,
+    val exposesApiKey: Boolean,
+)
+
 enum class SettingsToggleKey {
     DynamicColor,
     DeveloperMode,
@@ -131,6 +149,20 @@ fun buildSettingsSections(state: SettingsUiState): List<SettingsSectionUiModel> 
             ),
         ),
     )
+}
+
+fun buildAiConfigRows(inputs: List<AiConfigRowInput>): List<AiConfigRowUiModel> {
+    return inputs.map { input ->
+        AiConfigRowUiModel(
+            id = input.id,
+            title = input.displayName,
+            subtitle = input.model,
+            isReadOnly = input.isBuiltIn,
+            canDelete = !input.isBuiltIn,
+            canRevealApiKey = !input.isBuiltIn,
+            exposesApiKey = false,
+        )
+    }
 }
 
 @Composable

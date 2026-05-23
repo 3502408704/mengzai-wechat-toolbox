@@ -4,15 +4,13 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.view.MotionEvent
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,7 +52,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -148,7 +145,6 @@ fun PreviewRoute(
 }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 fun PreviewScreen(
     source: PreviewRouteSource,
     state: PreviewUiState,
@@ -192,22 +188,6 @@ fun PreviewScreen(
             AndroidView(
                 modifier = Modifier
                     .fillMaxSize()
-                    .combinedClickable(
-                        onClick = {},
-                        onDoubleClick = {
-                            immersiveMode = true
-                            topActionsRevealed = false
-                        },
-                    )
-                    .pointerInput(Unit) {
-                        detectVerticalDragGestures(
-                            onVerticalDrag = { _, dragAmount ->
-                                if (shouldRevealPreviewTopActions(dragAmount.roundToInt())) {
-                                    topActionsRevealed = true
-                                }
-                            },
-                        )
-                    }
                     .semantics {
                         contentDescription = readingRegionSemantics.label
                         stateDescription = previewRegionStateDescription(
@@ -225,6 +205,21 @@ fun PreviewScreen(
                         settings.displayZoomControls = false
                         settings.cacheMode = WebSettings.LOAD_NO_CACHE
                         settings.setSupportZoom(true)
+                        setOnTouchListener { _, event ->
+                            when (event.actionMasked) {
+                                MotionEvent.ACTION_DOWN -> {
+                                    immersiveMode = false
+                                    topActionsRevealed = true
+                                }
+                                MotionEvent.ACTION_POINTER_DOWN -> {
+                                    if (event.pointerCount >= 2) {
+                                        immersiveMode = true
+                                        topActionsRevealed = false
+                                    }
+                                }
+                            }
+                            false
+                        }
                         webViewClient = object : WebViewClient() {
                             override fun onPageFinished(view: WebView?, url: String?) {
                                 super.onPageFinished(view, url)
@@ -523,6 +518,7 @@ internal data class PreviewReadingRegionSemantics(
     val isScrollable: Boolean,
     val isEditable: Boolean,
     val isZoomable: Boolean,
+    val interceptsExploreByTouch: Boolean,
 )
 
 internal fun previewSourceSubtitle(source: PreviewRouteSource): String {
@@ -546,6 +542,7 @@ internal fun previewReadingRegionSemantics(): PreviewReadingRegionSemantics {
         isScrollable = true,
         isEditable = false,
         isZoomable = true,
+        interceptsExploreByTouch = false,
     )
 }
 

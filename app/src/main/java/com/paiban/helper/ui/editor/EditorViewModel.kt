@@ -9,6 +9,7 @@ import com.paiban.helper.domain.clipboard.ClipboardInspector
 import com.paiban.helper.domain.model.ContentType
 import com.paiban.helper.domain.template.ArticleTemplateRepository
 import com.paiban.helper.domain.template.TemplateCategory
+import com.paiban.helper.ui.ai.chat.AiSuggestionSelection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,6 +81,13 @@ class EditorViewModel @Inject constructor(
                         latest.templateId,
                     )
                 }
+            }
+        }
+        viewModelScope.launch {
+            AiSuggestionSelection.selection.collect { pending ->
+                if (pending == null) return@collect
+                applyAiSuggestion(pending.content, pending.mode)
+                AiSuggestionSelection.clear()
             }
         }
     }
@@ -176,6 +184,31 @@ class EditorViewModel @Inject constructor(
                 content,
             ).copy(title = title, transientMessage = "已导入文件")
         }
+        persistDraft()
+    }
+
+    fun applyAiSuggestion(suggestion: String, mode: AiSuggestionApplyMode) {
+        if (suggestion.isBlank()) return
+        _uiState.update {
+            reducer.applyAiSuggestion(
+                state = it,
+                suggestion = suggestion,
+                mode = mode,
+            ).copy(
+                transientMessage = if (mode == AiSuggestionApplyMode.Replace) {
+                    "已替换正文"
+                } else {
+                    "已追加到正文"
+                }
+            )
+        }
+        AiSuggestionSelection.publishCompletion(
+            if (mode == AiSuggestionApplyMode.Replace) {
+                "已替换正文"
+            } else {
+                "已追加到正文"
+            }
+        )
         persistDraft()
     }
 
