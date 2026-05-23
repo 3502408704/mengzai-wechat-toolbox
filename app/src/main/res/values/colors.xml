@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="paiban_primary">#2E6B4E</color>
+    <color name="paiban_primary_dark">#B6F0C8</color>
+    <color name="paiban_background_light">#F7F5EF</color>
+    <color name="paiban_background_dark">#111412</color>
+    <color name="paiban_surface_light">#FFFFFF</color>
+    <color name="paiban_surface_dark">#1B1F1C</color>
+</resources>

@@ -1,0 +1,145 @@
+package com.paiban.helper.domain.template
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class ArticleTemplateRepositoryTest {
+    @Test
+    fun loadTemplatesReturnsTwelveSeedTemplatesAcrossFourCategories() {
+        val repository = ArticleTemplateRepository(
+            jsonLoader = { SAMPLE_JSON },
+        )
+
+        val templates = repository.getAllTemplates()
+
+        assertEquals(12, templates.size)
+        assertEquals(setOf("minimalist", "business", "literary", "tech"), templates.map { it.category }.toSet())
+    }
+
+    @Test
+    fun getDefaultTemplateReturnsExistingTemplate() {
+        val repository = ArticleTemplateRepository(
+            jsonLoader = { SAMPLE_JSON },
+        )
+
+        val template = repository.getDefaultTemplate()
+
+        assertEquals("minimalist-0", template.id)
+        assertEquals("minimalist", template.category)
+    }
+
+    private companion object {
+        const val SAMPLE_JSON = """
+            [
+              {
+                "id":"minimalist-0","name":"极简·经典","description":"极简风模板","category":"minimalist","themeColor":"#3b82f6","backgroundColor":"#ffffff",
+                "containerStyle":"padding:16px;","h1Style":"color:#3b82f6;","h2Style":"color:#111827;","h3Style":"color:#374151;",
+                "pStyle":"line-height:1.8;","blockquoteStyle":"border-left:3px solid #3b82f6;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 8px 0;","listIconHtml":"<section>•</section>","strongStyle":"font-weight:bold;",
+                "emStyle":"font-style:italic;","codeContainerStyle":"border:1px solid #e5e7eb;","codeHeaderStyle":"background-color:#e2e8f0;",
+                "codeBlockStyle":"font-family:monospace;","imgStyle":"max-width:100%;","hrStyle":"border-top:1px solid #e5e7eb;","linkStyle":"color:#3b82f6;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#f8fafc;","tdStyle":"background-color:#ffffff;","delStyle":"opacity:0.6;"
+              },
+              {
+                "id":"minimalist-1","name":"极简·清晨","description":"极简风模板","category":"minimalist","themeColor":"#10b981","backgroundColor":"#ffffff",
+                "containerStyle":"padding:16px;","h1Style":"color:#10b981;","h2Style":"color:#111827;","h3Style":"color:#374151;",
+                "pStyle":"line-height:1.8;","blockquoteStyle":"border-left:3px solid #10b981;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 8px 0;","listIconHtml":"<section>•</section>","strongStyle":"font-weight:bold;",
+                "emStyle":"font-style:italic;","codeContainerStyle":"border:1px solid #e5e7eb;","codeHeaderStyle":"background-color:#e2e8f0;",
+                "codeBlockStyle":"font-family:monospace;","imgStyle":"max-width:100%;","hrStyle":"border-top:1px solid #e5e7eb;","linkStyle":"color:#10b981;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#f8fafc;","tdStyle":"background-color:#ffffff;","delStyle":"opacity:0.6;"
+              },
+              {
+                "id":"minimalist-2","name":"极简·暮光","description":"极简风模板","category":"minimalist","themeColor":"#6366f1","backgroundColor":"#ffffff",
+                "containerStyle":"padding:16px;","h1Style":"color:#6366f1;","h2Style":"color:#111827;","h3Style":"color:#374151;",
+                "pStyle":"line-height:1.8;","blockquoteStyle":"border-left:3px solid #6366f1;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 8px 0;","listIconHtml":"<section>•</section>","strongStyle":"font-weight:bold;",
+                "emStyle":"font-style:italic;","codeContainerStyle":"border:1px solid #e5e7eb;","codeHeaderStyle":"background-color:#e2e8f0;",
+                "codeBlockStyle":"font-family:monospace;","imgStyle":"max-width:100%;","hrStyle":"border-top:1px solid #e5e7eb;","linkStyle":"color:#6366f1;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#f8fafc;","tdStyle":"background-color:#ffffff;","delStyle":"opacity:0.6;"
+              },
+              {
+                "id":"business-0","name":"商务·经典","description":"商务风模板","category":"business","themeColor":"#1e40af","backgroundColor":"#ffffff",
+                "containerStyle":"padding:20px;","h1Style":"color:#1e40af;","h2Style":"background-color:#1e40af;color:#ffffff;","h3Style":"color:#1e40af;",
+                "pStyle":"line-height:1.8;text-indent:2em;","blockquoteStyle":"border-left:6px solid #1e40af;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 10px 0;","listIconHtml":"<section>■</section>","strongStyle":"font-weight:bold;color:#1e40af;",
+                "emStyle":"font-style:italic;","codeContainerStyle":"border:1px solid #475569;","codeHeaderStyle":"background-color:#334155;",
+                "codeBlockStyle":"font-family:monospace;color:#f8fafc;","imgStyle":"max-width:100%;","hrStyle":"border-top:2px dashed #1e40af;","linkStyle":"color:#1e40af;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#f8fafc;","tdStyle":"background-color:#ffffff;","delStyle":"opacity:0.6;"
+              },
+              {
+                "id":"business-1","name":"商务·深蓝","description":"商务风模板","category":"business","themeColor":"#0f766e","backgroundColor":"#ffffff",
+                "containerStyle":"padding:20px;","h1Style":"color:#0f766e;","h2Style":"background-color:#0f766e;color:#ffffff;","h3Style":"color:#0f766e;",
+                "pStyle":"line-height:1.8;text-indent:2em;","blockquoteStyle":"border-left:6px solid #0f766e;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 10px 0;","listIconHtml":"<section>■</section>","strongStyle":"font-weight:bold;color:#0f766e;",
+                "emStyle":"font-style:italic;","codeContainerStyle":"border:1px solid #475569;","codeHeaderStyle":"background-color:#334155;",
+                "codeBlockStyle":"font-family:monospace;color:#f8fafc;","imgStyle":"max-width:100%;","hrStyle":"border-top:2px dashed #0f766e;","linkStyle":"color:#0f766e;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#f8fafc;","tdStyle":"background-color:#ffffff;","delStyle":"opacity:0.6;"
+              },
+              {
+                "id":"business-2","name":"商务·沉稳","description":"商务风模板","category":"business","themeColor":"#4338ca","backgroundColor":"#ffffff",
+                "containerStyle":"padding:20px;","h1Style":"color:#4338ca;","h2Style":"background-color:#4338ca;color:#ffffff;","h3Style":"color:#4338ca;",
+                "pStyle":"line-height:1.8;text-indent:2em;","blockquoteStyle":"border-left:6px solid #4338ca;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 10px 0;","listIconHtml":"<section>■</section>","strongStyle":"font-weight:bold;color:#4338ca;",
+                "emStyle":"font-style:italic;","codeContainerStyle":"border:1px solid #475569;","codeHeaderStyle":"background-color:#334155;",
+                "codeBlockStyle":"font-family:monospace;color:#f8fafc;","imgStyle":"max-width:100%;","hrStyle":"border-top:2px dashed #4338ca;","linkStyle":"color:#4338ca;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#f8fafc;","tdStyle":"background-color:#ffffff;","delStyle":"opacity:0.6;"
+              },
+              {
+                "id":"literary-0","name":"文艺·春风","description":"文艺风模板","category":"literary","themeColor":"#059669","backgroundColor":"#fdfcfb",
+                "containerStyle":"padding:24px 16px;","h1Style":"color:#059669;","h2Style":"color:#059669;","h3Style":"color:#374151;",
+                "pStyle":"line-height:2;letter-spacing:1px;","blockquoteStyle":"background-color:#f7f3ef;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 12px 0;","listIconHtml":"<section>○</section>","strongStyle":"border-bottom:2px solid #059669;",
+                "emStyle":"font-style:italic;color:#059669;","codeContainerStyle":"border:1px solid #e5ddd5;","codeHeaderStyle":"background-color:#f6efe8;",
+                "codeBlockStyle":"font-family:monospace;color:#374151;","imgStyle":"max-width:100%;border-radius:12px;","hrStyle":"border-top:1px solid #d1c7bf;","linkStyle":"color:#059669;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#fdfcfb;","tdStyle":"background-color:#fdfcfb;","delStyle":"opacity:0.5;"
+              },
+              {
+                "id":"literary-1","name":"文艺·暖阳","description":"文艺风模板","category":"literary","themeColor":"#d97706","backgroundColor":"#fdfcfb",
+                "containerStyle":"padding:24px 16px;","h1Style":"color:#d97706;","h2Style":"color:#d97706;","h3Style":"color:#374151;",
+                "pStyle":"line-height:2;letter-spacing:1px;","blockquoteStyle":"background-color:#f7f3ef;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 12px 0;","listIconHtml":"<section>○</section>","strongStyle":"border-bottom:2px solid #d97706;",
+                "emStyle":"font-style:italic;color:#d97706;","codeContainerStyle":"border:1px solid #e5ddd5;","codeHeaderStyle":"background-color:#f6efe8;",
+                "codeBlockStyle":"font-family:monospace;color:#374151;","imgStyle":"max-width:100%;border-radius:12px;","hrStyle":"border-top:1px solid #d1c7bf;","linkStyle":"color:#d97706;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#fdfcfb;","tdStyle":"background-color:#fdfcfb;","delStyle":"opacity:0.5;"
+              },
+              {
+                "id":"literary-2","name":"文艺·夜曲","description":"文艺风模板","category":"literary","themeColor":"#be185d","backgroundColor":"#fdfcfb",
+                "containerStyle":"padding:24px 16px;","h1Style":"color:#be185d;","h2Style":"color:#be185d;","h3Style":"color:#374151;",
+                "pStyle":"line-height:2;letter-spacing:1px;","blockquoteStyle":"background-color:#f7f3ef;","blockquoteInnerBefore":"","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 12px 0;","listIconHtml":"<section>○</section>","strongStyle":"border-bottom:2px solid #be185d;",
+                "emStyle":"font-style:italic;color:#be185d;","codeContainerStyle":"border:1px solid #e5ddd5;","codeHeaderStyle":"background-color:#f6efe8;",
+                "codeBlockStyle":"font-family:monospace;color:#374151;","imgStyle":"max-width:100%;border-radius:12px;","hrStyle":"border-top:1px solid #d1c7bf;","linkStyle":"color:#be185d;",
+                "tableStyle":"width:100%;","thStyle":"background-color:#fdfcfb;","tdStyle":"background-color:#fdfcfb;","delStyle":"opacity:0.5;"
+              },
+              {
+                "id":"tech-0","name":"科技·终端","description":"科技风模板","category":"tech","themeColor":"#2563eb","backgroundColor":"#0f172a",
+                "containerStyle":"padding:20px;background-color:#0f172a;","h1Style":"color:#10b981;","h2Style":"border-left:6px solid #2563eb;","h3Style":"color:#2563eb;",
+                "pStyle":"line-height:1.8;color:#cbd5e1;","blockquoteStyle":"border:1px solid #2563eb;background-color:#1e293b;","blockquoteInnerBefore":"<span>&gt;</span>","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 10px 0;","listIconHtml":"<section>/&gt;</section>","strongStyle":"border-bottom:1px solid #2563eb;color:#ffffff;",
+                "emStyle":"text-decoration:underline;color:#2563eb;","codeContainerStyle":"border:1px solid #334155;background-color:#000000;","codeHeaderStyle":"background-color:#1e293b;",
+                "codeBlockStyle":"font-family:monospace;color:#10b981;","imgStyle":"max-width:100%;border:2px solid #334155;","hrStyle":"border-top:1px solid #334155;","linkStyle":"color:#2563eb;",
+                "tableStyle":"width:100%;background-color:#0f172a;","thStyle":"background-color:#1e293b;color:#ffffff;","tdStyle":"background-color:#0f172a;color:#cbd5e1;","delStyle":"opacity:0.5;"
+              },
+              {
+                "id":"tech-1","name":"科技·脉冲","description":"科技风模板","category":"tech","themeColor":"#0ea5e9","backgroundColor":"#0f172a",
+                "containerStyle":"padding:20px;background-color:#0f172a;","h1Style":"color:#10b981;","h2Style":"border-left:6px solid #0ea5e9;","h3Style":"color:#0ea5e9;",
+                "pStyle":"line-height:1.8;color:#cbd5e1;","blockquoteStyle":"border:1px solid #0ea5e9;background-color:#1e293b;","blockquoteInnerBefore":"<span>&gt;</span>","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 10px 0;","listIconHtml":"<section>/&gt;</section>","strongStyle":"border-bottom:1px solid #0ea5e9;color:#ffffff;",
+                "emStyle":"text-decoration:underline;color:#0ea5e9;","codeContainerStyle":"border:1px solid #334155;background-color:#000000;","codeHeaderStyle":"background-color:#1e293b;",
+                "codeBlockStyle":"font-family:monospace;color:#10b981;","imgStyle":"max-width:100%;border:2px solid #334155;","hrStyle":"border-top:1px solid #334155;","linkStyle":"color:#0ea5e9;",
+                "tableStyle":"width:100%;background-color:#0f172a;","thStyle":"background-color:#1e293b;color:#ffffff;","tdStyle":"background-color:#0f172a;color:#cbd5e1;","delStyle":"opacity:0.5;"
+              },
+              {
+                "id":"tech-2","name":"科技·回响","description":"科技风模板","category":"tech","themeColor":"#8b5cf6","backgroundColor":"#0f172a",
+                "containerStyle":"padding:20px;background-color:#0f172a;","h1Style":"color:#10b981;","h2Style":"border-left:6px solid #8b5cf6;","h3Style":"color:#8b5cf6;",
+                "pStyle":"line-height:1.8;color:#cbd5e1;","blockquoteStyle":"border:1px solid #8b5cf6;background-color:#1e293b;","blockquoteInnerBefore":"<span>&gt;</span>","blockquoteInnerAfter":"",
+                "listStyle":"margin:0;","listItemStyle":"margin:0 0 10px 0;","listIconHtml":"<section>/&gt;</section>","strongStyle":"border-bottom:1px solid #8b5cf6;color:#ffffff;",
+                "emStyle":"text-decoration:underline;color:#8b5cf6;","codeContainerStyle":"border:1px solid #334155;background-color:#000000;","codeHeaderStyle":"background-color:#1e293b;",
+                "codeBlockStyle":"font-family:monospace;color:#10b981;","imgStyle":"max-width:100%;border:2px solid #334155;","hrStyle":"border-top:1px solid #334155;","linkStyle":"color:#8b5cf6;",
+                "tableStyle":"width:100%;background-color:#0f172a;","thStyle":"background-color:#1e293b;color:#ffffff;","tdStyle":"background-color:#0f172a;color:#cbd5e1;","delStyle":"opacity:0.5;"
+              }
+            ]
+        """
+    }
+}

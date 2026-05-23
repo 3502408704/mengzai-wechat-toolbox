@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信Android端无障碍问题提醒</title>
+    <style>
+        :root {
+            --bg: #fdf6f0;
+            --card-bg: #ffffff;
+            --primary: #c0392b;
+            --accent: #e67e22;
+            --text: #3e3232;
+            --text-secondary: #6b5e5e;
+            --border-soft: #f0e4d8;
+            --tag-bg: #fef5ec;
+            --tag-border: #f5d5b8;
+            --highlight-bg: #fffaf3;
+            --highlight-border: #fce4c8;
+            --green-tip: #2e7d32;
+            --green-bg: #f1f8f2;
+            --green-border: #c8e6c9;
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --shadow-card: 0 2px 12px rgba(60, 30, 10, 0.06);
+            --shadow-hover: 0 4px 20px rgba(60, 30, 10, 0.10);
+            --font-size-base: 16px;
+            --font-size-sm: 14px;
+            --font-size-lg: 18px;
+            --font-size-xl: 22px;
+            --line-height: 1.8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f5ede4;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 20px 12px 40px;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .article-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            padding: 28px 22px 32px;
+        }
+
+        .article-container::before {
+            content: '';
+            display: block;
+            width: 52px;
+            height: 5px;
+            background: linear-gradient(90deg, #e67e22, #c0392b);
+            border-radius: 3px;
+            margin-bottom: 20px;
+        }
+
+        .article-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: #2c1a1a;
+            line-height: 1.45;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="article-container">
+        <h1 class="article-title">📱 微信Android端无障碍问题提醒</h1>
+        <p class="article-meta">近期 · 共性问题汇总 · 请大家留意</p>
+        <div class="section">
+            <p>大家好，近期我留意到有不少视障伙伴反馈，最新版微信安卓端——像<span class="text-accent">8.0.72</span>这些版本——出了些让人头疼的问题。</p>
+        </div>
+    </div>
+</body>
+</html>
