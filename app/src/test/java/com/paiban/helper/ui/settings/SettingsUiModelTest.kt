@@ -15,7 +15,7 @@ class SettingsUiModelTest {
     }
 
     @Test
-    fun liquidWorkbenchSettingsCopyExplainsDynamicColorAsAccentOnly() {
+    fun settingsCopyExplainsDynamicColorAsAccentOnly() {
         val sections = buildSettingsSections(SettingsUiState())
         val appearance = sections.first { it.title == "外观" }
         val dynamicColor = appearance.rows.filterIsInstance<SettingsRowUiModel.Toggle>().single()

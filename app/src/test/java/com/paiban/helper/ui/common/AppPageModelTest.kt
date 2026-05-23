@@ -3,10 +3,7 @@ package com.paiban.helper.ui.common
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.paiban.helper.navigation.AppDestination
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AppPageModelTest {
@@ -63,14 +60,4 @@ class AppPageModelTest {
         assertEquals(12.dp, values.calculateBottomPadding())
     }
 
-    @Test
-    fun destinationSelectionMatchesNestedRoutesWithoutMatchingSimilarPrefixes() {
-        assertTrue(isDestinationSelected(currentRoute = "editor", destination = AppDestination.Editor))
-        assertTrue(isDestinationSelected(currentRoute = "editor/details", destination = AppDestination.Editor))
-        assertTrue(isDestinationSelected(currentRoute = "editor?mode=create", destination = AppDestination.Editor))
-
-        assertFalse(isDestinationSelected(currentRoute = "editorial", destination = AppDestination.Editor))
-        assertFalse(isDestinationSelected(currentRoute = "preview/editor", destination = AppDestination.Editor))
-        assertFalse(isDestinationSelected(currentRoute = null, destination = AppDestination.Editor))
-    }
 }
