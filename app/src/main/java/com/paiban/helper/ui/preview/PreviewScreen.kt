@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.webkit.WebSettings
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -44,6 +43,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -144,6 +145,7 @@ fun PreviewRoute(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewScreen(
     source: PreviewRouteSource,
@@ -181,46 +183,63 @@ fun PreviewScreen(
                     onExport = onExport,
                 )
 
-                // === WebView 预览区 ===
-                AndroidView(
+                // === WebView 预览区（下拉刷新）===
+                var isRefreshing by remember { mutableStateOf(false) }
+
+                LaunchedEffect(isRefreshing) {
+                    if (isRefreshing) {
+                        onRefresh()
+                    }
+                }
+
+                // 观察 transientMessage 来关闭刷新指示器
+                LaunchedEffect(state.transientMessage) {
+                    if (isRefreshing) {
+                        isRefreshing = false
+                    }
+                }
+
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = { isRefreshing = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .semantics {
-                            contentDescription = "排版预览"
-                            stateDescription = previewRegionStateDescription(state.zoomPercent)
-                            liveRegion = LiveRegionMode.Polite
-                        },
-                    factory = { context ->
-                        WebView(context).apply {
-                            settings.javaScriptEnabled = false
-                            settings.domStorageEnabled = false
-                            settings.loadWithOverviewMode = true
-                            settings.useWideViewPort = true
-                            settings.builtInZoomControls = true
-                            settings.displayZoomControls = false
-                            settings.cacheMode = WebSettings.LOAD_NO_CACHE
-                            settings.setSupportZoom(true)
-                            webViewClient = object : WebViewClient() {
-                                override fun onPageFinished(view: WebView?, url: String?) {
-                                    super.onPageFinished(view, url)
-                                }
+                        .weight(1f),
+                ) {
+                    AndroidView(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .semantics {
+                                contentDescription = "排版预览"
+                                stateDescription = previewRegionStateDescription(state.zoomPercent)
+                                liveRegion = LiveRegionMode.Polite
+                            },
+                        factory = { context ->
+                            WebView(context).apply {
+                                settings.javaScriptEnabled = false
+                                settings.domStorageEnabled = false
+                                settings.loadWithOverviewMode = true
+                                settings.useWideViewPort = true
+                                settings.builtInZoomControls = true
+                                settings.displayZoomControls = false
+                                settings.cacheMode = WebSettings.LOAD_NO_CACHE
+                                settings.setSupportZoom(true)
                             }
-                        }
-                    },
-                    update = { webView ->
-                        webView.loadDataWithBaseURL(
-                            null,
-                            state.htmlDocument,
-                            "text/html",
-                            "utf-8",
-                            null,
-                        )
-                        webView.post {
-                            webView.setInitialScale(state.zoomPercent)
-                        }
-                    },
-                )
+                        },
+                        update = { webView ->
+                            webView.loadDataWithBaseURL(
+                                null,
+                                state.htmlDocument,
+                                "text/html",
+                                "utf-8",
+                                null,
+                            )
+                            webView.post {
+                                webView.setInitialScale(state.zoomPercent)
+                            }
+                        },
+                    )
+                }
             }
         }
 

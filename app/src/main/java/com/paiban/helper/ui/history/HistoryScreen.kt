@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.onLongClick
@@ -167,10 +168,6 @@ private fun HistoryListItemCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .combinedClickable(
-                    onClick = { onPreview(item.entity) },
-                    onLongClick = { menuExpanded = true },
-                )
                 .semantics(mergeDescendants = true) {
                     contentDescription = item.accessibilityLabel
                     customActions = listOf(
@@ -206,14 +203,15 @@ private fun HistoryListItemCard(
                     Text(
                         item.title,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        modifier = Modifier.weight(1f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).clearAndSetSemantics {},
                     )
                     Text(
                         item.timeLabel,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.clearAndSetSemantics {},
                     )
                 }
                 if (item.summary.isNotBlank()) {
@@ -223,6 +221,7 @@ private fun HistoryListItemCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.clearAndSetSemantics {},
                     )
                 }
                 Row(
@@ -232,12 +231,14 @@ private fun HistoryListItemCard(
                         item.formatLabel,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clearAndSetSemantics {},
                     )
                     if (item.favoriteLabel != null) {
                         Text(
                             item.favoriteLabel,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.clearAndSetSemantics {},
                         )
                     }
                 }
