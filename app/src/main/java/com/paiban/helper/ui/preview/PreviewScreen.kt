@@ -9,8 +9,6 @@ import android.webkit.WebView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,10 +35,12 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
+import androidx.compose.material.icons.outlined.ZoomIn
+import androidx.compose.material.icons.outlined.ZoomOut
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -177,7 +177,8 @@ fun PreviewScreen(
                     source = source,
                     zoomPercent = state.zoomPercent,
                     onNavigateBack = onNavigateBack,
-                    onZoomChange = onZoomChange,
+                    onZoomIn = { onZoomChange(((state.zoomPercent + 5).coerceAtMost(150)).toFloat()) },
+                    onZoomOut = { onZoomChange(((state.zoomPercent - 5).coerceAtLeast(85)).toFloat()) },
                     onResetZoom = onResetZoom,
                     onCopy = onCopy,
                     onShare = onShare,
@@ -263,7 +264,8 @@ private fun PreviewTopBar(
     source: PreviewRouteSource,
     zoomPercent: Int,
     onNavigateBack: () -> Unit,
-    onZoomChange: (Float) -> Unit,
+    onZoomIn: () -> Unit,
+    onZoomOut: () -> Unit,
     onResetZoom: () -> Unit,
     onCopy: () -> Unit,
     onShare: () -> Unit,
@@ -355,33 +357,50 @@ private fun PreviewTopBar(
                 }
             }
 
-            // 第二行：缩放滑块
+            // 第二行：缩放控制
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Slider(
-                    value = zoomPercent.toFloat(),
-                    onValueChange = onZoomChange,
-                    valueRange = 85f..150f,
-                    steps = 12,
-                    modifier = Modifier
-                        .weight(1f)
-                        .semantics {
-                            contentDescription = "缩放比例"
-                        },
-                )
+                // 缩小按钮
+                IconButton(
+                    onClick = onZoomOut,
+                    enabled = zoomPercent > 85,
+                    modifier = Modifier.semantics {
+                        contentDescription = "缩小"
+                    },
+                ) {
+                    Icon(Icons.Outlined.ZoomOut, contentDescription = null)
+                }
+
+                // 百分比文本（仅视觉，无障碍只随按钮播报）
                 Text(
                     text = previewZoomLabel(zoomPercent),
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                        ) { onResetZoom() }
-                        .clearAndSetSemantics { }
+                    modifier = Modifier.clearAndSetSemantics { },
                 )
+
+                // 放大按钮
+                IconButton(
+                    onClick = onZoomIn,
+                    enabled = zoomPercent < 150,
+                    modifier = Modifier.semantics {
+                        contentDescription = "放大"
+                    },
+                ) {
+                    Icon(Icons.Outlined.ZoomIn, contentDescription = null)
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                // 重置缩放
+                TextButton(
+                    onClick = onResetZoom,
+                    enabled = zoomPercent != 100,
+                ) {
+                    Text("重置", style = MaterialTheme.typography.labelMedium)
+                }
             }
         }
     }
