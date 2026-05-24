@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.preview
+﻿package com.paiban.helper.ui.preview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class PreviewViewModel @Inject constructor(
@@ -109,19 +110,20 @@ class PreviewViewModel @Inject constructor(
     }
 
     fun notifyCopied() {
-        _uiState.value = _uiState.value.copy(transientMessage = "已复制预览内容到剪贴板")
+        _uiState.value = _uiState.value.copy(transientMessage = "已复制")
     }
 
     fun notifyExported() {
-        _uiState.value = _uiState.value.copy(transientMessage = "已生成导出内容")
+        _uiState.value = _uiState.value.copy(transientMessage = "已导出")
     }
 
     fun notifyShared() {
-        _uiState.value = _uiState.value.copy(transientMessage = "已打开分享面板")
+        _uiState.value = _uiState.value.copy(transientMessage = "")
     }
 
-    fun updateZoomPercent(rawValue: Int) {
-        val snappedValue = previewZoomSteps().minBy { step -> abs(step - rawValue) }
+    fun updateZoomPercent(rawValue: Float) {
+        val snappedValue = (rawValue / 5f).roundToInt() * 5
+            .coerceIn(85, 150)
         if (snappedValue != _uiState.value.zoomPercent) {
             _uiState.value = _uiState.value.copy(
                 zoomPercent = snappedValue,
@@ -134,7 +136,7 @@ class PreviewViewModel @Inject constructor(
         if (_uiState.value.zoomPercent != 100) {
             _uiState.value = _uiState.value.copy(
                 zoomPercent = 100,
-                transientMessage = "已恢复原始比例",
+                transientMessage = "已重置",
             )
         }
     }
