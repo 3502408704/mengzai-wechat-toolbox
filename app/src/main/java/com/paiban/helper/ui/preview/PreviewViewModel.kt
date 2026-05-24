@@ -125,7 +125,6 @@ class PreviewViewModel @Inject constructor(
         if (snappedValue != _uiState.value.zoomPercent) {
             _uiState.value = _uiState.value.copy(
                 zoomPercent = snappedValue,
-                transientMessage = "已缩放到 ${snappedValue}%",
             )
         }
     }
