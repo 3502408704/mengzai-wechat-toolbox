@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.preview
+﻿package com.paiban.helper.ui.preview
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -62,6 +62,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.getSystemService
@@ -368,7 +369,6 @@ private fun PreviewTopBar(
                         .weight(1f)
                         .semantics {
                             contentDescription = "缩放比例"
-                            stateDescription = "${zoomPercent}%"
                         },
                 )
                 Text(
@@ -379,7 +379,8 @@ private fun PreviewTopBar(
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
-                        ) { onResetZoom() },
+                        ) { onResetZoom() }
+                        .clearAndSetSemantics { }
                 )
             }
         }
