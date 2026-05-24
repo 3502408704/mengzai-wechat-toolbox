@@ -369,6 +369,7 @@ private fun PreviewTopBar(
                     enabled = zoomPercent > 85,
                     modifier = Modifier.semantics {
                         contentDescription = "缩小"
+                        stateDescription = "百分之${zoomPercentToChinese(zoomPercent)}"
                     },
                 ) {
                     Icon(Icons.Outlined.ZoomOut, contentDescription = null)
@@ -387,6 +388,7 @@ private fun PreviewTopBar(
                     enabled = zoomPercent < 150,
                     modifier = Modifier.semantics {
                         contentDescription = "放大"
+                        stateDescription = "百分之${zoomPercentToChinese(zoomPercent)}"
                     },
                 ) {
                     Icon(Icons.Outlined.ZoomIn, contentDescription = null)
@@ -459,6 +461,28 @@ internal fun previewRegionStateDescription(zoomPercent: Int): String {
 }
 
 // ============================================================
+
+internal fun zoomPercentToChinese(percent: Int): String {
+    val digits = arrayOf("零", "一", "二", "三", "四", "五", "六", "七", "八", "九")
+    return when (percent) {
+        100 -> "一百"
+        in 101..150 -> {
+            val r = percent - 100
+            "一百" + when {
+                r < 10 -> "零" + digits[r]
+                r % 10 == 0 -> digits[r / 10] + "十"
+                else -> digits[r / 10] + "十" + digits[r % 10]
+            }
+        }
+        else -> {
+            val ten = percent / 10
+            val unit = percent % 10
+            if (unit == 0) digits[ten] + "十"
+            else digits[ten] + "十" + digits[unit]
+        }
+    }
+}
+
 // 剪贴板 / 分享
 // ============================================================
 
