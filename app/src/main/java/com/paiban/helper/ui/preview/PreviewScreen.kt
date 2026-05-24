@@ -4,13 +4,13 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.view.MotionEvent
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,54 +21,55 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.FileDownload
-import androidx.compose.material.icons.outlined.IosShare
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.paiban.helper.ui.common.previewFloatingActionInsets
 import com.paiban.helper.ui.common.rememberAccessibilityAnnouncer
 import com.paiban.helper.ui.editor.pageSnackbarBottomPadding
 import com.paiban.helper.ui.editor.snackbarMessageBufferOverflowStrategy
 import java.util.Locale
-import kotlin.math.abs
-import kotlin.math.roundToInt
 import kotlinx.coroutines.channels.Channel
 
 sealed interface PreviewRouteSource {
@@ -139,7 +140,7 @@ fun PreviewRoute(
             htmlExporter.launch(viewModel.exportFileName("html"))
         },
         onResetZoom = viewModel::resetZoom,
-        onZoomChange = viewModel::updateZoomPercent,
+        onZoomChange = { viewModel.updateZoomPercent(it) },
         snackbarHostState = snackbarHostState,
     )
 }
@@ -154,27 +155,10 @@ fun PreviewScreen(
     onShare: () -> Unit,
     onExport: () -> Unit,
     onResetZoom: () -> Unit,
-    onZoomChange: (Int) -> Unit,
+    onZoomChange: (Float) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    val readingRegionSemantics = previewReadingRegionSemantics()
-    val zoomSteps = previewZoomSteps()
-    val zoomIndex = zoomSteps.indexOf(state.zoomPercent).coerceAtLeast(0)
-    var immersiveMode by remember(state.source) { mutableStateOf(false) }
-    var topActionsRevealed by remember(state.source) { mutableStateOf(true) }
-    var isAtBottom by remember(state.source) { mutableStateOf(false) }
-    val chromeState = previewChromeState(
-        immersiveMode = immersiveMode,
-        topActionsRevealed = topActionsRevealed,
-        isAtBottom = isAtBottom,
-        hasContent = !state.isEmpty,
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         if (state.isEmpty) {
             EmptyPreviewState(
                 message = state.unavailableMessage ?: "暂无可预览内容",
@@ -185,105 +169,63 @@ fun PreviewScreen(
                 },
             )
         } else {
-            AndroidView(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .semantics {
-                        contentDescription = readingRegionSemantics.label
-                        stateDescription = previewRegionStateDescription(
-                            zoomPercent = state.zoomPercent,
-                            immersiveMode = immersiveMode,
-                        )
+            Column(modifier = Modifier.fillMaxSize()) {
+                // === 固定顶栏 ===
+                PreviewTopBar(
+                    source = source,
+                    zoomPercent = state.zoomPercent,
+                    onNavigateBack = onNavigateBack,
+                    onZoomChange = onZoomChange,
+                    onResetZoom = onResetZoom,
+                    onCopy = onCopy,
+                    onShare = onShare,
+                    onExport = onExport,
+                )
+
+                // === WebView 预览区 ===
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .semantics {
+                            contentDescription = "排版预览"
+                            stateDescription = previewRegionStateDescription(state.zoomPercent)
+                            liveRegion = LiveRegionMode.Polite
+                        },
+                    factory = { context ->
+                        WebView(context).apply {
+                            settings.javaScriptEnabled = false
+                            settings.domStorageEnabled = false
+                            settings.loadWithOverviewMode = true
+                            settings.useWideViewPort = true
+                            settings.builtInZoomControls = true
+                            settings.displayZoomControls = false
+                            settings.cacheMode = WebSettings.LOAD_NO_CACHE
+                            settings.setSupportZoom(true)
+                            webViewClient = object : WebViewClient() {
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                }
+                            }
+                        }
                     },
-                factory = { context ->
-                    WebView(context).apply {
-                        settings.javaScriptEnabled = false
-                        settings.domStorageEnabled = false
-                        settings.loadWithOverviewMode = true
-                        settings.useWideViewPort = true
-                        settings.builtInZoomControls = true
-                        settings.displayZoomControls = false
-                        settings.cacheMode = WebSettings.LOAD_NO_CACHE
-                        settings.setSupportZoom(true)
-                        setOnTouchListener { _, event ->
-                            when (event.actionMasked) {
-                                MotionEvent.ACTION_DOWN -> {
-                                    immersiveMode = false
-                                    topActionsRevealed = true
-                                }
-                                MotionEvent.ACTION_POINTER_DOWN -> {
-                                    if (event.pointerCount >= 2) {
-                                        immersiveMode = true
-                                        topActionsRevealed = false
-                                    }
-                                }
-                            }
-                            false
+                    update = { webView ->
+                        webView.loadDataWithBaseURL(
+                            null,
+                            state.htmlDocument,
+                            "text/html",
+                            "utf-8",
+                            null,
+                        )
+                        webView.post {
+                            webView.setInitialScale(state.zoomPercent)
                         }
-                        webViewClient = object : WebViewClient() {
-                            override fun onPageFinished(view: WebView?, url: String?) {
-                                super.onPageFinished(view, url)
-                                view?.setOnScrollChangeListener { _, _, scrollY, _, _ ->
-                                    val contentHeightPx = (view.contentHeight * view.scale).roundToInt()
-                                    val viewportBottom = scrollY + view.height
-                                    isAtBottom = contentHeightPx > 0 && viewportBottom >= contentHeightPx - 24
-                                    if (!immersiveMode) {
-                                        topActionsRevealed = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                update = { webView ->
-                    webView.loadDataWithBaseURL(
-                        null,
-                        state.htmlDocument,
-                        "text/html",
-                        "utf-8",
-                        null,
-                    )
-                    webView.post {
-                        webView.setInitialScale(state.zoomPercent)
-                    }
-                },
-            )
+                    },
+                )
+            }
         }
 
-        if (chromeState.showTopActions) {
-            PreviewTopOverlay(
-                source = source,
-                zoomPercent = state.zoomPercent,
-                zoomIndex = zoomIndex,
-                zoomSteps = zoomSteps,
-                onNavigateBack = onNavigateBack,
-                onRefresh = onRefresh,
-                onShare = onShare,
-                onExport = onExport,
-                onResetZoom = onResetZoom,
-                onZoomChange = onZoomChange,
-            )
-        } else if (chromeState.showZoomStrip) {
-            PreviewZoomOverlay(
-                zoomPercent = state.zoomPercent,
-                zoomIndex = zoomIndex,
-                zoomSteps = zoomSteps,
-                onZoomChange = onZoomChange,
-            )
-        }
-
-        if (chromeState.showCopyAction) {
-            ExtendedFloatingActionButton(
-                onClick = onCopy,
-                icon = {},
-                text = { Text(previewPrimaryActionLabel()) },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .windowInsetsPadding(previewFloatingActionInsets())
-                    .padding(bottom = 24.dp),
-            )
-        }
-
+        // Snackbar
         androidx.compose.material3.SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
@@ -293,103 +235,55 @@ fun PreviewScreen(
     }
 }
 
-@Composable
-private fun PreviewZoomOverlay(
-    zoomPercent: Int,
-    zoomIndex: Int,
-    zoomSteps: List<Int>,
-    onZoomChange: (Int) -> Unit,
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-        shape = RoundedCornerShape(20.dp),
-        tonalElevation = 4.dp,
-        modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = previewZoomLabel(zoomPercent),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.semantics {
-                    contentDescription = "缩放比例"
-                    stateDescription = previewZoomLabel(zoomPercent)
-                },
-            )
-            Slider(
-                value = zoomIndex.toFloat(),
-                onValueChange = { value ->
-                    onZoomChange(zoomSteps[value.roundToInt().coerceIn(0, zoomSteps.lastIndex)])
-                },
-                valueRange = 0f..zoomSteps.lastIndex.toFloat(),
-                steps = zoomSteps.size - 2,
-                modifier = Modifier
-                    .weight(1f)
-                    .semantics {
-                        contentDescription = "缩放"
-                        stateDescription = previewZoomLabel(zoomPercent)
-                    },
-            )
-        }
-    }
-}
+// ============================================================
+// 固定顶栏
+// ============================================================
 
 @Composable
-private fun PreviewTopOverlay(
+private fun PreviewTopBar(
     source: PreviewRouteSource,
     zoomPercent: Int,
-    zoomIndex: Int,
-    zoomSteps: List<Int>,
     onNavigateBack: () -> Unit,
-    onRefresh: () -> Unit,
+    onZoomChange: (Float) -> Unit,
+    onResetZoom: () -> Unit,
+    onCopy: () -> Unit,
     onShare: () -> Unit,
     onExport: () -> Unit,
-    onResetZoom: () -> Unit,
-    onZoomChange: (Int) -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     Surface(
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-        shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
-        tonalElevation = 6.dp,
-        shadowElevation = 6.dp,
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp,
+        shadowElevation = 4.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)),
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            // 第一行：返回 + 标题 + ⋮
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 IconButton(
                     onClick = onNavigateBack,
-                    modifier = Modifier.semantics { contentDescription = previewBackNavigationContentDescription() },
+                    modifier = Modifier.semantics { contentDescription = "返回" },
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = null,
-                    )
+                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
                 }
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
                 ) {
                     Text(
                         text = "预览",
                         style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics { heading() },
                     )
                     Text(
                         text = previewSourceSubtitle(source),
@@ -397,89 +291,89 @@ private fun PreviewTopOverlay(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                IconButton(
-                    onClick = { menuExpanded = true },
-                    modifier = Modifier.semantics { contentDescription = "更多操作" },
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.MoreVert,
-                        contentDescription = null,
-                    )
-                }
-                DropdownMenu(
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false },
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("刷新") },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.Refresh, contentDescription = null)
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            onRefresh()
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("分享") },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.IosShare, contentDescription = null)
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            onShare()
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("导出") },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.FileDownload, contentDescription = null)
-                        },
-                        onClick = {
-                            menuExpanded = false
-                            onExport()
-                        },
-                    )
-                    DropdownMenuItem(
-                        text = { Text("恢复原始比例") },
-                        onClick = {
-                            menuExpanded = false
-                            onResetZoom()
-                        },
-                    )
+                Box {
+                    IconButton(
+                        onClick = { menuExpanded = true },
+                        modifier = Modifier.semantics { contentDescription = "更多选项" },
+                    ) {
+                        Icon(Icons.Outlined.MoreVert, contentDescription = null)
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("复制") },
+                            onClick = {
+                                menuExpanded = false
+                                onCopy()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.ContentCopy, contentDescription = null)
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("分享") },
+                            onClick = {
+                                menuExpanded = false
+                                onShare()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.Share, contentDescription = null)
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("导出") },
+                            onClick = {
+                                menuExpanded = false
+                                onExport()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Outlined.FileDownload, contentDescription = null)
+                            },
+                        )
+                    }
                 }
             }
+
+            // 第二行：缩放滑块
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    text = previewZoomLabel(zoomPercent),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.semantics {
-                        contentDescription = "缩放比例"
-                        stateDescription = previewZoomLabel(zoomPercent)
-                    },
-                )
                 Slider(
-                    value = zoomIndex.toFloat(),
-                    onValueChange = { value ->
-                        onZoomChange(zoomSteps[value.roundToInt().coerceIn(0, zoomSteps.lastIndex)])
-                    },
-                    valueRange = 0f..zoomSteps.lastIndex.toFloat(),
-                    steps = zoomSteps.size - 2,
+                    value = zoomPercent.toFloat(),
+                    onValueChange = onZoomChange,
+                    valueRange = 85f..150f,
+                    steps = 12,
                     modifier = Modifier
                         .weight(1f)
                         .semantics {
-                            contentDescription = "缩放"
-                            stateDescription = previewZoomLabel(zoomPercent)
+                            contentDescription = "缩放比例"
+                            stateDescription = "${zoomPercent}%"
                         },
+                )
+                Text(
+                    text = previewZoomLabel(zoomPercent),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .semantics {
+                            contentDescription = "缩放"
+                            stateDescription = "${zoomPercent}%"
+                        }
+                        .clickable(
+                            interactionSource = null,
+                            indication = null,
+                        ) { onResetZoom() },
                 )
             }
         }
     }
 }
+// ============================================================
+// 空状态
+// ============================================================
 
 @Composable
 private fun EmptyPreviewState(message: String, hint: String) {
@@ -513,13 +407,9 @@ private fun EmptyPreviewState(message: String, hint: String) {
     }
 }
 
-internal data class PreviewReadingRegionSemantics(
-    val label: String,
-    val isScrollable: Boolean,
-    val isEditable: Boolean,
-    val isZoomable: Boolean,
-    val interceptsExploreByTouch: Boolean,
-)
+// ============================================================
+// 辅助函数
+// ============================================================
 
 internal fun previewSourceSubtitle(source: PreviewRouteSource): String {
     return when (source) {
@@ -528,68 +418,15 @@ internal fun previewSourceSubtitle(source: PreviewRouteSource): String {
     }
 }
 
-internal fun previewBackNavigationContentDescription(): String = "返回"
-
-internal fun previewPrimaryActionLabel(): String = "复制富文本"
-
-internal fun previewZoomSteps(): List<Int> = listOf(85, 100, 115, 130, 150, 175)
-
-internal fun previewOverflowActionLabels(): List<String> = listOf("分享", "导出", "恢复原始比例")
-
-internal fun previewReadingRegionSemantics(): PreviewReadingRegionSemantics {
-    return PreviewReadingRegionSemantics(
-        label = "公众号排版效果预览",
-        isScrollable = true,
-        isEditable = false,
-        isZoomable = true,
-        interceptsExploreByTouch = false,
-    )
-}
-
 internal fun previewZoomLabel(zoomPercent: Int): String = String.format(Locale.CHINA, "%d%%", zoomPercent)
 
-internal data class PreviewChromeState(
-    val showTopActions: Boolean,
-    val showZoomStrip: Boolean,
-    val showCopyAction: Boolean,
-)
-
-internal fun previewChromeState(
-    immersiveMode: Boolean,
-    topActionsRevealed: Boolean,
-    isAtBottom: Boolean,
-    hasContent: Boolean,
-): PreviewChromeState {
-    if (!hasContent) {
-        return PreviewChromeState(
-            showTopActions = true,
-            showZoomStrip = false,
-            showCopyAction = false,
-        )
-    }
-    if (!immersiveMode) {
-        return PreviewChromeState(
-            showTopActions = true,
-            showZoomStrip = true,
-            showCopyAction = isAtBottom,
-        )
-    }
-    return PreviewChromeState(
-        showTopActions = topActionsRevealed,
-        showZoomStrip = true,
-        showCopyAction = isAtBottom,
-    )
+internal fun previewRegionStateDescription(zoomPercent: Int): String {
+    return "只读，可滚动，当前缩放 ${zoomPercent}%"
 }
 
-internal fun shouldRevealPreviewTopActions(scrollDeltaY: Int): Boolean = scrollDeltaY <= -72
-
-internal fun previewRegionStateDescription(
-    zoomPercent: Int,
-    immersiveMode: Boolean,
-): String {
-    val modeDescription = if (immersiveMode) "沉浸预览" else "标准预览"
-    return "只读，可滚动，可缩放，当前 ${zoomPercent}%，$modeDescription"
-}
+// ============================================================
+// 剪贴板 / 分享
+// ============================================================
 
 private fun copyPreviewToClipboard(context: Context, html: String, plainText: String) {
     val clipboard = context.getSystemService<ClipboardManager>() ?: return
