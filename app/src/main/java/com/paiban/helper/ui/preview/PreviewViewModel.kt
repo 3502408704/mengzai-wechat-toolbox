@@ -1,4 +1,4 @@
-﻿package com.paiban.helper.ui.preview
+package com.paiban.helper.ui.preview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -118,7 +118,7 @@ class PreviewViewModel @Inject constructor(
     }
 
     fun notifyShared() {
-        _uiState.value = _uiState.value.copy(transientMessage = "")
+        _uiState.value = _uiState.value.copy(transientMessage = "已打开分享面板")
     }
 
     fun updateZoomPercent(rawValue: Float) {
