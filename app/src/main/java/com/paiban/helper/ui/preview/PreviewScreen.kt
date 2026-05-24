@@ -193,7 +193,6 @@ fun PreviewScreen(
                         .semantics {
                             contentDescription = "排版预览"
                             stateDescription = previewRegionStateDescription(state.zoomPercent)
-                            liveRegion = LiveRegionMode.Polite
                         },
                     factory = { context ->
                         WebView(context).apply {
