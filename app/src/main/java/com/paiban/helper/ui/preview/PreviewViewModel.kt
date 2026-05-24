@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.preview
+﻿package com.paiban.helper.ui.preview
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -121,8 +121,7 @@ class PreviewViewModel @Inject constructor(
     }
 
     fun updateZoomPercent(rawValue: Float) {
-        val snappedValue = (rawValue / 5f).roundToInt() * 5
-            .coerceIn(85, 150)
+        val snappedValue = ((rawValue / 5f).roundToInt() * 5).coerceIn(85, 150)
         if (snappedValue != _uiState.value.zoomPercent) {
             _uiState.value = _uiState.value.copy(
                 zoomPercent = snappedValue,
