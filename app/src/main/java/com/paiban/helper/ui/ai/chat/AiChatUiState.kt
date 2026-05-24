@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.ai.chat
+﻿package com.paiban.helper.ui.ai.chat
 
 data class AiChatUiState(
     val configs: List<AiChatConfigUiModel> = defaultAiChatConfigs(),
@@ -17,25 +17,15 @@ data class AiChatConfigUiModel(
     val displayName: String,
     val model: String,
     val isBuiltIn: Boolean,
-) {
-    val isReadOnly: Boolean
-        get() = isBuiltIn
+)
 
-    val canDelete: Boolean
-        get() = !isBuiltIn
-
-    fun accessibilityLabel(): String = if (isBuiltIn) "默认模型" else displayName
-}
+enum class BubbleRole { User, Assistant }
 
 data class AiChatMessageUiModel(
     val id: Long,
-    val role: String,
+    val role: BubbleRole,
     val content: String,
-)
-
-data class AiChatMessageSemantics(
-    val speakerLabel: String,
-    val mergeContentIntoSingleNode: Boolean,
+    val hasCodeBlocks: Boolean = false,
 )
 
 fun AiChatUiState.appendMessage(message: AiChatMessageUiModel): AiChatUiState {
@@ -43,20 +33,13 @@ fun AiChatUiState.appendMessage(message: AiChatMessageUiModel): AiChatUiState {
 }
 
 fun AiChatUiState.latestAssistantMessage(): AiChatMessageUiModel? {
-    return messages.lastOrNull { it.role == "assistant" }
-}
-
-fun aiChatMessageSemantics(role: String): AiChatMessageSemantics {
-    return AiChatMessageSemantics(
-        speakerLabel = if (role == "user") "你" else "AI",
-        mergeContentIntoSingleNode = false,
-    )
+    return messages.lastOrNull { it.role == BubbleRole.Assistant }
 }
 
 fun defaultAiChatConfigs(): List<AiChatConfigUiModel> = listOf(
     AiChatConfigUiModel(
         id = 1L,
-        displayName = "DeepSeek 默认",
+        displayName = "DeepSeek",
         model = "deepseek-v4-flash",
         isBuiltIn = true,
     ),

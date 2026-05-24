@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.editor
+﻿package com.paiban.helper.ui.editor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -93,9 +93,7 @@ class EditorViewModel @Inject constructor(
     }
 
     fun selectTemplate(templateId: String) {
-        _uiState.update { state ->
-            state.copy(pendingTemplateId = templateId)
-        }
+        _uiState.update { state -> state.copy(pendingTemplateId = templateId) }
     }
 
     fun confirmTemplateSelection() {
@@ -135,8 +133,29 @@ class EditorViewModel @Inject constructor(
         viewModelScope.launch { settingsRepository.updateEditorFontScale(scale) }
     }
 
-    fun insertMarkdown(prefix: String, suffix: String = prefix) {
-        _uiState.update { reducer.wrapSelection(it, prefix, suffix) }
+    // ---- 格式插入方法（匹配 APK 格式工具栏） ----
+
+    /** 包裹选中文本（加粗、斜体、删除线、行内代码） */
+    fun insertMarkdown(prefix: String, suffix: String = "") {
+        _uiState.update { reducer.wrapSelection(it, prefix, suffix.ifEmpty { prefix }) }
+        persistDraft()
+    }
+
+    /** 在当前行/新行插入行前缀（标题、引用、列表） */
+    fun insertLinePrefix(prefix: String) {
+        _uiState.update { reducer.insertLinePrefix(it, prefix) }
+        persistDraft()
+    }
+
+    /** 插入多行包裹（代码块） */
+    fun insertBlockWrap(before: String, after: String) {
+        _uiState.update { reducer.blockWrap(it, before, after) }
+        persistDraft()
+    }
+
+    /** 在光标处插入内容 */
+    fun insertAtCursor(text: String) {
+        _uiState.update { reducer.insertAtCursor(it, text) }
         persistDraft()
     }
 
@@ -151,13 +170,9 @@ class EditorViewModel @Inject constructor(
         persistDraft()
     }
 
-    fun importClipboardContent() {
-        // 剪贴板导入已统一走 suggestClipboardImport(text) 的即时导入路径。
-    }
+    fun importClipboardContent() { }
 
-    fun dismissClipboardSuggestion() {
-        Unit
-    }
+    fun dismissClipboardSuggestion() { Unit }
 
     fun clearDraft() {
         _uiState.value = applyTemplateSelection(
@@ -195,19 +210,11 @@ class EditorViewModel @Inject constructor(
                 suggestion = suggestion,
                 mode = mode,
             ).copy(
-                transientMessage = if (mode == AiSuggestionApplyMode.Replace) {
-                    "已替换正文"
-                } else {
-                    "已追加到正文"
-                }
+                transientMessage = if (mode == AiSuggestionApplyMode.Replace) "已替换正文" else "已追加到正文"
             )
         }
         AiSuggestionSelection.publishCompletion(
-            if (mode == AiSuggestionApplyMode.Replace) {
-                "已替换正文"
-            } else {
-                "已追加到正文"
-            }
+            if (mode == AiSuggestionApplyMode.Replace) "已替换正文" else "已追加到正文"
         )
         persistDraft()
     }
@@ -215,6 +222,18 @@ class EditorViewModel @Inject constructor(
     fun consumeTransientMessage() {
         _uiState.update { it.copy(transientMessage = null) }
     }
+
+    fun onToggleBold() { insertMarkdown("**", "**") }
+    fun onToggleItalic() { insertMarkdown("*", "*") }
+    fun onToggleStrikethrough() { insertMarkdown("~~", "~~") }
+    fun onInsertHeading() { insertLinePrefix("# ") }
+    fun onInsertQuote() { insertLinePrefix("> ") }
+    fun onInsertUnorderedList() { insertLinePrefix("- ") }
+    fun onInsertOrderedList() { insertLinePrefix("1. ") }
+    fun onInsertLink() { insertMarkdown("[", "](url)") }
+    fun onInsertImage() { insertMarkdown("![", "](url)") }
+    fun onInsertInlineCode() { insertMarkdown("`", "`") }    fun onInsertDivider() { insertAtCursor("\n\n---\n\n") }
+    fun onInsertCodeBlock() { insertBlockWrap("```\n", "\n```") }
 
     private fun applyTemplateSelection(state: EditorUiState, templateId: String): EditorUiState {
         val fallback = templateOptions.firstOrNull()

@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.editor
+﻿package com.paiban.helper.ui.editor
 
 import com.paiban.helper.domain.template.ArticleTemplateRepository
 
@@ -27,19 +27,6 @@ data class EditorUiState(
     val availableTemplates: List<TemplateOption> = emptyList(),
     val transientMessage: String? = null,
 )
-
-internal fun editorHomeSections(
-    hasTemplates: Boolean,
-): List<String> = buildList {
-    add("intro")
-    add("workspace")
-    add("toolbar")
-    if (hasTemplates) {
-        add("template_summary")
-    }
-    add("ai_teaser")
-    add("preferences")
-}
 
 internal fun templateSelectionToApply(state: EditorUiState): String = state.pendingTemplateId
 
@@ -91,6 +78,7 @@ class EditorStateReducer {
         )
     }
 
+    /** 包裹选中文本 */
     fun wrapSelection(state: EditorUiState, prefix: String, suffix: String = prefix): EditorUiState {
         val start = state.selectionStart.coerceIn(0, state.content.length)
         val end = state.selectionEnd.coerceIn(start, state.content.length)
@@ -109,6 +97,69 @@ class EditorStateReducer {
                 content = updated,
                 selectionStart = start + prefix.length,
                 selectionEnd = start + prefix.length + selected.length,
+            )
+        )
+    }
+
+    /** 在当前行/新行前插入前缀（用于标题、引用、列表） */
+    fun insertLinePrefix(state: EditorUiState, prefix: String): EditorUiState {
+        val pos = state.selectionStart.coerceIn(0, state.content.length)
+        // 找到当前行开头
+        val lineStart = state.content.lastIndexOf('\n', if (pos == 0) 0 else pos - 1).let { if (it == -1) 0 else it + 1 }
+        val updated = buildString {
+            append(state.content.substring(0, lineStart))
+            append(prefix)
+            append(state.content.substring(lineStart))
+        }
+        val offset = prefix.length
+        undoStack.addLast(state.content)
+        redoStack.clear()
+        return updateCapabilities(
+            state.copy(
+                content = updated,
+                selectionStart = pos + offset,
+                selectionEnd = pos + offset,
+            )
+        )
+    }
+
+    /** 包裹选区为块级元素（如代码块） */
+    fun blockWrap(state: EditorUiState, before: String, after: String): EditorUiState {
+        val start = state.selectionStart.coerceIn(0, state.content.length)
+        val end = state.selectionEnd.coerceIn(start, state.content.length)
+        val updated = buildString {
+            append(state.content.substring(0, start))
+            append(before)
+            append(state.content.substring(start, end))
+            append(after)
+            append(state.content.substring(end))
+        }
+        undoStack.addLast(state.content)
+        redoStack.clear()
+        return updateCapabilities(
+            state.copy(
+                content = updated,
+                selectionStart = start + before.length,
+                selectionEnd = end + before.length,
+            )
+        )
+    }
+
+    /** 在光标位置插入文本 */
+    fun insertAtCursor(state: EditorUiState, text: String): EditorUiState {
+        val pos = state.selectionStart.coerceIn(0, state.content.length)
+        val updated = buildString {
+            append(state.content.substring(0, pos))
+            append(text)
+            append(state.content.substring(pos))
+        }
+        undoStack.addLast(state.content)
+        redoStack.clear()
+        return updateCapabilities(
+            state.copy(
+                content = updated,
+                selectionStart = pos + text.length,
+                selectionEnd = pos + text.length,
             )
         )
     }

@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.history
+﻿package com.paiban.helper.ui.history
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -6,36 +6,43 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.paiban.helper.ui.common.AppPage
-import com.paiban.helper.ui.common.PageHeaderModel
 
 @Composable
 fun HistoryRoute(
@@ -49,6 +56,7 @@ fun HistoryRoute(
         onPreview = { item -> handleHistoryPreview(item, onNavigatePreview) },
         onEdit = { item -> handleHistoryEdit(item, viewModel::editHistory, onNavigateEditor) },
         onDelete = viewModel::deleteHistory,
+        onClearAll = viewModel::clearAllHistory,
     )
 }
 
@@ -68,53 +76,78 @@ internal fun handleHistoryEdit(
     onNavigateEditor()
 }
 
-internal fun historyPageTitle(): String = "历史"
-
-internal fun historyAccessibilityActionLabels(): List<String> = listOf("预览", "编辑", "删除")
-
 @Composable
 fun HistoryScreen(
     state: HistoryUiState,
     onPreview: (com.paiban.helper.data.db.HistoryEntity) -> Unit,
     onEdit: (com.paiban.helper.data.db.HistoryEntity) -> Unit,
     onDelete: (com.paiban.helper.data.db.HistoryEntity) -> Unit,
+    onClearAll: () -> Unit = {},
 ) {
-    AppPage(
-        header = PageHeaderModel(title = historyPageTitle()),
-    ) { contentPadding ->
+    Column(modifier = Modifier.fillMaxSize()) {
+        // 标题栏
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "历史",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            )
+            if (state.items.isNotEmpty()) {
+                TextButton(onClick = onClearAll) {
+                    Icon(
+                        Icons.Outlined.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 4.dp),
+                    )
+                    Text("清空")
+                }
+            }
+        }
+
         if (state.items.isEmpty()) {
+            // 空状态
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(contentPadding.asPaddingValues()),
+                    .padding(32.dp),
                 verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    "历史为空",
+                    "暂无历史记录",
                     style = MaterialTheme.typography.headlineSmall,
                 )
+                Spacer(Modifier.height(8.dp))
                 Text(
                     "完成一次预览后，这里会自动保存快照。",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            return@AppPage
-        }
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentPadding = contentPadding.asPaddingValues(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(state.items, key = { it.entity.id }) { item ->
-                HistoryListItemCard(
-                    item = item,
-                    onPreview = onPreview,
-                    onEdit = onEdit,
-                    onDelete = onDelete,
-                )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    horizontal = 16.dp,
+                    vertical = 8.dp,
+                ),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(state.items, key = { it.entity.id }) { item ->
+                    HistoryListItemCard(
+                        item = item,
+                        onPreview = onPreview,
+                        onEdit = onEdit,
+                        onDelete = onDelete,
+                    )
+                }
+                // 底部留白
+                item { Spacer(Modifier.height(16.dp)) }
             }
         }
     }
@@ -140,65 +173,73 @@ private fun HistoryListItemCard(
                 )
                 .semantics(mergeDescendants = true) {
                     contentDescription = item.accessibilityLabel
-                    customActions = historyAccessibilityActionLabels().mapNotNull { action ->
-                        when (action) {
-                            "预览" -> CustomAccessibilityAction(action) {
-                                onPreview(item.entity)
-                                true
-                            }
-
-                            "编辑" -> CustomAccessibilityAction(action) {
-                                onEdit(item.entity)
-                                true
-                            }
-
-                            "删除" -> CustomAccessibilityAction(action) {
-                                onDelete(item.entity)
-                                true
-                            }
-
-                            else -> null
-                        }
-                    }
-                    onLongClick(label = "打开操作菜单") {
-                        menuExpanded = true
-                        true
+                    customActions = listOf(
+                        CustomAccessibilityAction("预览") {
+                            onPreview(item.entity); true
+                        },
+                        CustomAccessibilityAction("编辑") {
+                            onEdit(item.entity); true
+                        },
+                        CustomAccessibilityAction("删除") {
+                            onDelete(item.entity); true
+                        },
+                    )
+                    onLongClick(label = "操作菜单") {
+                        menuExpanded = true; true
                     }
                 },
+            shape = RoundedCornerShape(12.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         item.title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        item.timeLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (item.summary.isNotBlank()) {
+                    Text(
+                        item.summary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        item.formatLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                     if (item.favoriteLabel != null) {
-                        AssistChip(
-                            onClick = {},
-                            enabled = false,
-                            modifier = Modifier.clearAndSetSemantics {},
-                            label = { Text(item.favoriteLabel) },
-                            colors = AssistChipDefaults.assistChipColors(
-                                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                disabledLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            ),
+                        Text(
+                            item.favoriteLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary,
                         )
                     }
-                }
-                Text(
-                    "${item.formatLabel} · ${item.timeLabel}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                if (item.summary.isNotBlank()) {
-                    Text(item.summary, style = MaterialTheme.typography.bodyMedium)
                 }
             }
         }
@@ -209,24 +250,18 @@ private fun HistoryListItemCard(
         ) {
             DropdownMenuItem(
                 text = { Text("预览") },
-                onClick = {
-                    menuExpanded = false
-                    onPreview(item.entity)
-                },
+                leadingIcon = { Icon(Icons.Outlined.Visibility, null) },
+                onClick = { menuExpanded = false; onPreview(item.entity) },
             )
             DropdownMenuItem(
                 text = { Text("编辑") },
-                onClick = {
-                    menuExpanded = false
-                    onEdit(item.entity)
-                },
+                leadingIcon = { Icon(Icons.Outlined.Edit, null) },
+                onClick = { menuExpanded = false; onEdit(item.entity) },
             )
             DropdownMenuItem(
                 text = { Text("删除") },
-                onClick = {
-                    menuExpanded = false
-                    onDelete(item.entity)
-                },
+                leadingIcon = { Icon(Icons.Outlined.Delete, null) },
+                onClick = { menuExpanded = false; onDelete(item.entity) },
             )
         }
     }

@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.history
+﻿package com.paiban.helper.ui.history
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -59,7 +59,13 @@ class HistoryViewModel @Inject constructor(
         editHistory(item)
     }
 
-    fun deleteHistory(item: HistoryEntity) {
+    
+    fun clearAllHistory() {
+        viewModelScope.launch {
+            editorRepository.clearHistory()
+        }
+    }
+fun deleteHistory(item: HistoryEntity) {
         viewModelScope.launch {
             if (HistoryPreviewSelection.selectedHistory.value?.id == item.id) {
                 HistoryPreviewSelection.clear()

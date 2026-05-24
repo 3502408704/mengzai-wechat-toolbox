@@ -1,18 +1,25 @@
-package com.paiban.helper.navigation
+﻿package com.paiban.helper.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -23,12 +30,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.paiban.helper.ui.ai.AiAssistantScreen
 import com.paiban.helper.ui.editor.EditorRoute
-import com.paiban.helper.ui.editor.TemplateSelectionRoute
 import com.paiban.helper.ui.history.HistoryRoute
 import com.paiban.helper.ui.preview.PreviewRoute
 import com.paiban.helper.ui.preview.PreviewRouteSource
 import com.paiban.helper.ui.settings.SettingsRoute
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
@@ -40,12 +47,23 @@ fun AppNavGraph(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            NavigationBar {
-                AppDestination.topLevelDestinations().forEach { destination ->
+            val showBottomBar = currentDestination
+                ?.hierarchy
+                ?.any { dest ->
+                    AppDestination.topLevelDestinations().any { it.route == dest.route }
+                } == true
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 2.dp,
+                ) {
+                    AppDestination.topLevelDestinations().forEach { destination ->
+                    val selected = currentDestination
+                        ?.hierarchy
+                        ?.any { it.route == destination.route } == true
+
                     NavigationBarItem(
-                        selected = currentDestination
-                            ?.hierarchy
-                            ?.any { it.route == destination.route } == true,
+                        selected = selected,
                         onClick = {
                             navController.navigate(destination.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -61,10 +79,25 @@ fun AppNavGraph(
                                 contentDescription = destination.label,
                             )
                         },
-                        label = { androidx.compose.material3.Text(destination.label) },
+                        label = {
+                            Text(
+                                text = destination.label,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                ),
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                        )
                     )
                 }
-            }
+        }
+    }
         },
     ) { innerPadding ->
         NavHost(
@@ -77,7 +110,7 @@ fun AppNavGraph(
             composable(AppDestination.Editor.route) {
                 EditorRoute(
                     onNavigatePreview = { navController.navigate(AppDestination.previewEditorRoute()) },
-                    onNavigateTemplates = { navController.navigate(AppDestination.Templates.route) },
+                    onNavigateAi = { navController.navigate(AppDestination.AiAssistant.route) },
                 )
             }
             composable(AppDestination.History.route) {
@@ -90,13 +123,11 @@ fun AppNavGraph(
                     },
                 )
             }
-            composable(AppDestination.Templates.route) {
-                TemplateSelectionRoute(
-                    onNavigateBack = { navController.popBackStack() },
-                )
-            }
+            // Templates now use inline ModalBottomSheet in EditorScreen
             composable(AppDestination.AiAssistant.route) {
-                AiAssistantScreen()
+                AiAssistantScreen(
+                    onDismiss = { navController.popBackStack() },
+                )
             }
             composable(AppDestination.Settings.route) {
                 SettingsRoute()
@@ -125,11 +156,11 @@ fun AppNavGraph(
 }
 
 private fun AppDestination.icon() = when (this) {
-    AppDestination.Editor -> Icons.Outlined.MenuBook
+    AppDestination.Editor -> Icons.Outlined.Edit
     AppDestination.History -> Icons.Outlined.History
-    AppDestination.AiAssistant -> Icons.Outlined.Palette
     AppDestination.Settings -> Icons.Outlined.Settings
-    AppDestination.Templates -> Icons.Outlined.MenuBook
-    AppDestination.PreviewEditor -> Icons.Outlined.MenuBook
+    AppDestination.Templates -> Icons.Outlined.Edit
+    AppDestination.AiAssistant -> Icons.Outlined.Edit
+    AppDestination.PreviewEditor -> Icons.Outlined.Edit
     AppDestination.PreviewHistory -> Icons.Outlined.History
 }

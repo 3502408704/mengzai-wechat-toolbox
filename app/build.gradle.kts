@@ -29,8 +29,8 @@ android {
         applicationId = "com.paiban.helper"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "0.81"
         buildConfigField("String", "DEEPSEEK_API_KEY", "\"$deepSeekApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
