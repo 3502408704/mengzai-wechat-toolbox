@@ -11,6 +11,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,11 +42,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -158,7 +157,7 @@ fun PreviewScreen(
     onZoomChange: (Float) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         if (state.isEmpty) {
             EmptyPreviewState(
                 message = state.unavailableMessage ?: "暂无可预览内容",
@@ -358,12 +357,8 @@ private fun PreviewTopBar(
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .semantics {
-                            contentDescription = "缩放"
-                            stateDescription = "${zoomPercent}%"
-                        }
                         .clickable(
-                            interactionSource = null,
+                            interactionSource = remember { MutableInteractionSource() },
                             indication = null,
                         ) { onResetZoom() },
                 )
