@@ -110,11 +110,11 @@ class PreviewViewModel @Inject constructor(
     }
 
     fun notifyCopied() {
-        _uiState.value = _uiState.value.copy(transientMessage = "已复制")
+        _uiState.value = _uiState.value.copy(transientMessage = "已复制预览内容到剪贴板")
     }
 
     fun notifyExported() {
-        _uiState.value = _uiState.value.copy(transientMessage = "已导出")
+        _uiState.value = _uiState.value.copy(transientMessage = "已生成导出内容")
     }
 
     fun notifyShared() {
