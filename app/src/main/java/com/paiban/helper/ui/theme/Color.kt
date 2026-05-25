@@ -69,7 +69,7 @@ val ApkFormatButtonTextSelected = Color(0xFF2563EB)
 val ApkEditorBg = Color(0xFFFFFFFF)
 val ApkEditorBorder = Color(0xFFE2E8F0)
 val ApkEditorText = Color(0xFF0F172A)
-val ApkEditorHint = Color(0xFF94A3B8)
+val ApkEditorHint = Color(0xFF64748B)
 
 // --- 卡片 ---
 val ApkCardBg = Color(0xFFFFFFFF)
@@ -78,7 +78,7 @@ val ApkCardBorder = Color(0xFFE2E8F0)
 // --- 底部导航 ---
 val ApkBottomNavBg = Color(0xFFFFFFFF)
 val ApkBottomNavSelected = Color(0xFF2563EB)
-val ApkBottomNavUnselected = Color(0xFF94A3B8)
+val ApkBottomNavUnselected = Color(0xFF64748B)
 
 // --- 渐变按钮（用于主要操作按钮） ---
 val ApkGradientStart = Color(0xFF2563EB)

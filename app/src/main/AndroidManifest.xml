@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+﻿<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -6,7 +6,7 @@
         android:name=".PaibanApplication"
         android:allowBackup="true"
         android:icon="@android:drawable/sym_def_app_icon"
-        android:label="排版助手"
+        android:label="梦子公众号排版工具"
         android:roundIcon="@android:drawable/sym_def_app_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.PaibanHelper">
@@ -22,3 +22,4 @@
     </application>
 
 </manifest>
+

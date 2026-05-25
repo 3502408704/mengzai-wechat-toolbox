@@ -10,7 +10,8 @@ enum class AppDestination(
     AiAssistant(route = "ai", label = "AI 辅助"),
     Settings(route = "settings", label = "设置"),
     PreviewEditor(route = "preview/editor", label = "预览"),
-    PreviewHistory(route = "preview/history/{historyId}", label = "历史预览");
+    PreviewHistory(route = "preview/history/{historyId}", label = "历史预览"),
+    Help(route = "help", label = "帮助");
 
     companion object {
         /** 底部导航栏显示的三个标签 */

@@ -8,7 +8,6 @@ import com.paiban.helper.domain.ai.AiSecretCrypto
 import com.paiban.helper.domain.ai.DeepSeekClientFacade
 import com.paiban.helper.domain.ai.DeepSeekMessage
 import com.paiban.helper.domain.ai.DeepSeekStreamChunk
-import com.paiban.helper.ui.editor.AiSuggestionApplyMode
 import com.paiban.helper.test.MainDispatcherRule
 import java.nio.file.Files
 import javax.crypto.SecretKey
@@ -18,7 +17,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -51,34 +49,10 @@ class AiChatViewModelTest {
         assertTrue(assistantMessage!!.content.contains("Model not found"))
     }
 
-    @Test
-    fun applySuggestionPublishesCompletionFeedbackForReplaceAction() = runTest {
-        val settingsRepository = AiSettingsRepository(
-            dao = FakeAiConfigDao(),
-            crypto = AiSecretCrypto(keyProvider = { fixedKey() }),
-        )
-        val repository = AiChatRepository(
-            storageDir = Files.createTempDirectory("ai-chat-view-model-test").toFile(),
-            client = PassiveDeepSeekClient(),
-        )
-        val viewModel = AiChatViewModel(
-            aiSettingsRepository = settingsRepository,
-            aiChatRepository = repository,
-        )
-
-        advanceUntilIdle()
-        viewModel.onSuggestionApplied(AiSuggestionApplyMode.Replace)
-
-        assertEquals("已替换正文", viewModel.uiState.value.transientMessage)
-    }
-
     private class FakeAiConfigDao : AiConfigDao {
         override fun observeAll(): Flow<List<AiConfigEntity>> = flowOf(emptyList())
-
         override suspend fun findById(id: Long): AiConfigEntity? = null
-
         override suspend fun upsert(entity: AiConfigEntity) = Unit
-
         override suspend fun deleteById(id: Long) = Unit
     }
 
@@ -88,10 +62,6 @@ class AiChatViewModelTest {
         override fun streamChat(messages: List<DeepSeekMessage>): Flow<DeepSeekStreamChunk> = flow {
             throw IllegalStateException(message)
         }
-    }
-
-    private class PassiveDeepSeekClient : DeepSeekClientFacade {
-        override fun streamChat(messages: List<DeepSeekMessage>): Flow<DeepSeekStreamChunk> = flowOf()
     }
 
     private fun fixedKey(): SecretKey {

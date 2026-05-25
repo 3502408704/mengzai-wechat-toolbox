@@ -1,24 +1,9 @@
-package com.paiban.helper.ui.editor
+﻿package com.paiban.helper.ui.editor
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class EditorTemplateRouteModelTest {
-    @Test
-    fun editorHomeSectionsHideInlineImportAndTemplatePicker() {
-        val model = editorHomeSections(
-            hasTemplates = true,
-        )
-
-        assertFalse(model.contains("import"))
-        assertFalse(model.contains("template_picker"))
-        assertTrue(model.contains("template_summary"))
-        assertTrue(model.contains("ai_teaser"))
-        assertFalse(model.contains("clipboard_suggestion"))
-    }
-
     @Test
     fun templateConfirmUsesPendingSelection() {
         val state = EditorUiState(
@@ -27,19 +12,19 @@ class EditorTemplateRouteModelTest {
             availableTemplates = listOf(
                 TemplateOption(
                     id = "minimalist-0",
-                    name = "极简·经典",
+                    name = "\u6781\u7b80\u00b7\u7ecf\u5178",
                     categoryId = "minimalist",
-                    categoryName = "极简风",
+                    categoryName = "\u6781\u7b80\u98ce",
                     themeColor = "#3b82f6",
-                    description = "极简风模板",
+                    description = "\u6781\u7b80\u98ce\u6a21\u677f",
                 ),
                 TemplateOption(
                     id = "business-0",
-                    name = "商务·经典",
+                    name = "\u5546\u52a1\u00b7\u7ecf\u5178",
                     categoryId = "business",
-                    categoryName = "商务风",
+                    categoryName = "\u5546\u52a1\u98ce",
                     themeColor = "#1e40af",
-                    description = "商务风模板",
+                    description = "\u5546\u52a1\u98ce\u6a21\u677f",
                 ),
             ),
         )

@@ -9,15 +9,13 @@ import org.junit.Test
 class PreviewLayoutModelTest {
     @Test
     fun previewSubtitleReflectsCurrentSource() {
-        assertEquals("来自当前草稿", previewSourceSubtitle(PreviewRouteSource.Editor))
-        assertEquals("来自历史记录", previewSourceSubtitle(PreviewRouteSource.History(8L)))
+        assertEquals("\u6765\u81ea\u5f53\u524d\u8349\u7a3f", previewSourceSubtitle(PreviewRouteSource.Editor))
+        assertEquals("\u6765\u81ea\u5386\u53f2\u8bb0\u5f55", previewSourceSubtitle(PreviewRouteSource.History(8L)))
     }
 
     @Test
-
-    @Test
     fun previewRegionStateDescriptionReflectsZoom() {
-        assertEquals("只读，可滚动，当前缩放 120%", previewRegionStateDescription(120))
+        assertEquals("\u53ea\u8bfb\uff0c\u53ef\u6eda\u52a8\uff0c\u5f53\u524d\u7f29\u653e 120%", previewRegionStateDescription(120))
     }
 
     @Test

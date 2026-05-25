@@ -1,4 +1,4 @@
-﻿package com.paiban.helper.ui.ai.chat
+package com.paiban.helper.ui.ai.chat
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -43,12 +43,10 @@ import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.QuestionAnswer
-import androidx.compose.material.icons.outlined.Send
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.UnfoldLess
 import androidx.compose.material.icons.outlined.UnfoldMore
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -145,7 +143,7 @@ fun AiChatPanel(
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
-            .semantics { contentDescription = "AI 辅助页面" },
+            .semantics { contentDescription = "AI 辅助" },
     ) {
         GeminiTopBar(
             sessionTitle = state.currentSessionTitle,
@@ -179,7 +177,7 @@ fun AiChatPanel(
                                 message.role == BubbleRole.Assistant &&
                                 message == state.messages.lastOrNull(),
                             onCopyFull = { copyToClipboard(context, message.content) },
-                
+
                             onToggleCodeExpand = { onToggleCodeExpanded(message.id) },
                             onDelete = { onDeleteMessage(message.id) },
                             onFollowUp = { onFollowUpMessage(message.content) },
@@ -251,7 +249,7 @@ private fun GeminiTopBar(
         Box {
             Row(
                 modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onToggleModelMenu)
-                    .semantics { contentDescription = "切换模型，当前：" }
+                    .semantics { contentDescription = "切换模型" }
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -269,7 +267,6 @@ private fun GeminiTopBar(
                             }
                         },
                         onClick = { onSelectConfig(config.id) },
-                        modifier = Modifier.semantics { contentDescription = "" },
                     )
                 }
             }
@@ -322,7 +319,7 @@ private fun GeminiInputArea(
         }
         Surface(shape = RoundedCornerShape(24.dp), color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
             Row(modifier = Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp), verticalAlignment = Alignment.Bottom) {
-                BasicTextField(value = prompt, onValueChange = onPromptChange, modifier = Modifier.weight(1f).padding(vertical = 8.dp).semantics { contentDescription = "输入" },
+                BasicTextField(value = prompt, onValueChange = onPromptChange, modifier = Modifier.weight(1f).padding(vertical = 8.dp).semantics { contentDescription = "消息输入框" },
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface), cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                     decorationBox = { inner -> if (prompt.isEmpty()) Text("输入消息…", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant); inner() })
                 Surface(onClick = { if (prompt.isNotBlank() && !isSending) onSend(prompt) }, shape = RoundedCornerShape(20.dp),
@@ -330,7 +327,7 @@ private fun GeminiInputArea(
                     modifier = Modifier.semantics { contentDescription = "发送" }.sizeIn(minWidth = 40.dp, minHeight = 40.dp)) {
                     Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
                         if (isSending) Text("…", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onPrimary)
-                        else Icon(Icons.Outlined.Send, contentDescription = null, modifier = Modifier.size(20.dp), tint = if (prompt.isNotBlank()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                        else Icon(Icons.AutoMirrored.Outlined.Send, contentDescription = null, modifier = Modifier.size(20.dp), tint = if (prompt.isNotBlank()) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
                     }
                 }
             }
@@ -374,8 +371,7 @@ private fun GeminiChatBubble(
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = if (isUser) 20.dp else 4.dp, bottomEnd = if (isUser) 4.dp else 20.dp),
             color = bgColor,
             modifier = Modifier.widthIn(max = 340.dp).semantics {
-                contentDescription = if (isUser) "你的消息" else "AI 回复"
-                contentDescription = if (isUser) "你的消息" else "AI 回复"
+                contentDescription = if (isUser) "你" else "AI"
                 if (isStreaming) liveRegion = LiveRegionMode.Polite
             },
 
@@ -402,7 +398,7 @@ private fun GeminiChatBubble(
                     modifier = Modifier.fillMaxWidth().semantics { contentDescription = "消息操作，共个按钮" },
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    
+
                     // 删除
                     TextButton(onClick = onDelete, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)) {
                         Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.error)
@@ -428,7 +424,6 @@ private fun GeminiChatBubble(
 }
 
 
-
 // ═══════════════════════════════════════════════════════════════
 //  消息内容渲染（折叠感知 + 结构化渲染）
 // ═══════════════════════════════════════════════════════════════
@@ -444,11 +439,6 @@ private fun MessageContent(
 ) {
     val context = LocalContext.current
     val displayContent = content
-
-
-
-
-
 
 
     if (hasCodeBlocks) {
@@ -520,10 +510,10 @@ private fun CollapsibleCodeBlock(
             // 展开/收起提示
             if (showCollapse) {
                 HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
-                TextButton(onClick = onToggleExpand, modifier = Modifier.fillMaxWidth().semantics { contentDescription = if (isExpanded) "收起代码块" else "展开全部  行" }, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
+                TextButton(onClick = onToggleExpand, modifier = Modifier.fillMaxWidth().semantics { contentDescription = if (isExpanded) "收起代码块" else "展开全部 $totalLines 行" }, contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)) {
                     Icon(if (isExpanded) Icons.Outlined.UnfoldLess else Icons.Outlined.UnfoldMore, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text(if (isExpanded) "收起代码块" else "展开全部  行", style = MaterialTheme.typography.labelSmall)
+                    Text(if (isExpanded) "收起代码块" else "展开全部 $totalLines 行", style = MaterialTheme.typography.labelSmall)
                 }
             }
         }
@@ -742,10 +732,5 @@ private fun RenameDialog(currentName: String, onConfirm: (String) -> Unit, onDis
         dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.semantics { contentDescription = "取消重命名" }) { Text("取消") } },
     )
 }
-
-
-
-
-
 
 

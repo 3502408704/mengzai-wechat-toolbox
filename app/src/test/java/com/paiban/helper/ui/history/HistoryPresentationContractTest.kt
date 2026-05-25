@@ -1,11 +1,11 @@
-package com.paiban.helper.ui.history
+﻿package com.paiban.helper.ui.history
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class HistoryPresentationContractTest {
     @Test
-    fun historyActionsExposePreviewEditDeleteInThatOrder() {
-        assertEquals(listOf("预览", "编辑", "删除"), historyAccessibilityActionLabels())
+    fun historyActionsExposeEditDeleteInThatOrder() {
+        assertEquals(listOf("\u7f16\u8f91", "\u5220\u9664"), historyActionLabels())
     }
 }

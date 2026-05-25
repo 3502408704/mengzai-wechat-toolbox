@@ -1,5 +1,6 @@
 ﻿package com.paiban.helper.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +64,10 @@ enum class SettingsToggleKey {
 }
 
 sealed interface SettingsRowUiModel {
+    data class Navigation(
+        val title: String,
+        val description: String,
+    ) : SettingsRowUiModel
     data class ThemeChoice(
         val mode: ThemeMode,
         val title: String,
@@ -122,6 +127,15 @@ fun buildSettingsSections(state: SettingsUiState): List<SettingsSectionUiModel> 
             ),
         ),
         SettingsSectionUiModel(
+            title = "帮助",
+            rows = listOf(
+                SettingsRowUiModel.Navigation(
+                    title = "使用指南",
+                    description = "快速入门、AI 辅助、历史记录与无障碍使用说明。",
+                ),
+            ),
+        ),
+        SettingsSectionUiModel(
             title = "关于",
             rows = listOf(
                 SettingsRowUiModel.Info(
@@ -151,6 +165,7 @@ private fun themeDescription(mode: ThemeMode): String = when (mode) {
 
 @Composable
 fun SettingsRoute(
+    onNavigateHelp: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -158,6 +173,7 @@ fun SettingsRoute(
 
     SettingsScreen(
         state = state,
+        onNavigateHelp = onNavigateHelp,
         onThemeModeSelected = viewModel::updateThemeMode,
         onDynamicColorChange = viewModel::updateDynamicColor,
         onDeveloperModeChange = viewModel::updateDeveloperMode,
@@ -180,6 +196,7 @@ fun SettingsRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 fun SettingsScreen(
     state: SettingsUiState,
+    onNavigateHelp: () -> Unit = {},
     onThemeModeSelected: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onDeveloperModeChange: (Boolean) -> Unit,
@@ -298,7 +315,7 @@ private fun AiConfigRow(
         modifier = Modifier
             .fillMaxWidth()
             .minimumInteractiveComponentSize()
-            .semantics(mergeDescendants = true) {}
+            
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -317,7 +334,7 @@ private fun AiConfigRow(
         if (onDelete != null) {
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier.size(36.dp).semantics { contentDescription = "删除${config.displayName}" },
+                modifier = Modifier.size(48.dp).semantics { contentDescription = "删除${config.displayName}" },
             ) {
                 Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.error)
             }
@@ -359,7 +376,7 @@ private fun AddAiConfigDialog(
                     label = { Text("提供商") },
                     placeholder = { Text("例如：openai / deepseek / custom") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = "提供商" },
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = model,
@@ -375,7 +392,7 @@ private fun AddAiConfigDialog(
                     label = { Text("接口地址") },
                     placeholder = { Text("例如：https://api.openai.com") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = "接口地址" },
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = apiKey,
@@ -413,6 +430,7 @@ private fun SettingsSectionCard(
     onThemeModeSelected: (ThemeMode) -> Unit,
     onDynamicColorChange: (Boolean) -> Unit,
     onDeveloperModeChange: (Boolean) -> Unit,
+    onNavigateHelp: () -> Unit = {},
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -432,6 +450,7 @@ private fun SettingsSectionCard(
                                 SettingsToggleKey.DeveloperMode -> onDeveloperModeChange(it)
                             }
                         })
+                        is SettingsRowUiModel.Navigation -> SettingsNavigationRow(row = row, onClick = onNavigateHelp)
                         is SettingsRowUiModel.Info -> SettingsInfoRow(row)
                     }
                     if (index != section.rows.lastIndex) {
@@ -447,7 +466,7 @@ private fun SettingsSectionCard(
 private fun SettingsThemeChoiceRow(row: SettingsRowUiModel.ThemeChoice, onClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().selectable(selected = row.selected, role = Role.RadioButton, onClick = onClick)
-            .minimumInteractiveComponentSize().semantics(mergeDescendants = true) {}.padding(horizontal = 16.dp, vertical = 14.dp),
+            .minimumInteractiveComponentSize().padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -462,7 +481,7 @@ private fun SettingsThemeChoiceRow(row: SettingsRowUiModel.ThemeChoice, onClick:
 private fun SettingsToggleRow(row: SettingsRowUiModel.Toggle, onToggle: (Boolean) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth().toggleable(value = row.checked, role = Role.Switch, onValueChange = onToggle)
-            .minimumInteractiveComponentSize().semantics(mergeDescendants = true) {}.padding(horizontal = 16.dp, vertical = 14.dp),
+            .minimumInteractiveComponentSize().padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -474,9 +493,43 @@ private fun SettingsToggleRow(row: SettingsRowUiModel.Toggle, onToggle: (Boolean
 }
 
 @Composable
+private fun SettingsNavigationRow(
+    row: SettingsRowUiModel.Navigation,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .minimumInteractiveComponentSize()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(row.title, style = MaterialTheme.typography.titleMedium)
+                Text(row.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(
+                text = "\u2192",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.clearAndSetSemantics { },
+            )
+        }
+    }
+}
+
+@Composable
 private fun SettingsInfoRow(row: SettingsRowUiModel.Info) {
     Box(
-        modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize().semantics(mergeDescendants = true) {}.padding(horizontal = 16.dp, vertical = 14.dp),
+        modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize().padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(row.title, style = MaterialTheme.typography.titleMedium)
@@ -484,6 +537,8 @@ private fun SettingsInfoRow(row: SettingsRowUiModel.Info) {
         }
     }
 }
+
+
 
 
 

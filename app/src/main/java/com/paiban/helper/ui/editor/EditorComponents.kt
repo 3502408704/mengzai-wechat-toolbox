@@ -142,7 +142,7 @@ private fun FormatGridItem(
             .clip(RoundedCornerShape(12.dp))
             .background(brand.formatButtonBg)
             .clickable(onClick = onClick)
-            .semantics { contentDescription = action.desc }
+
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -305,15 +305,21 @@ fun EditorWorkspace(
                 )
             }
             Box(modifier = Modifier.weight(1f)) {
-                if (content.isEmpty()) {
-                    Text("在此输入 Markdown / HTML 内容", style = MaterialTheme.typography.bodyLarge, color = brand.editorHint)
-                }
                 BasicTextField(
                     value = fieldValue, onValueChange = onValueChange,
                     modifier = Modifier.fillMaxWidth().semantics { contentDescription = "编辑区" },
                     textStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = (15f * fontScale).sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = (22f * fontScale).sp),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    decorationBox = { innerTextField -> Box { innerTextField() } },
+                    decorationBox = { innerTextField ->
+                        if (content.isEmpty()) {
+                            Text(
+                                "在此输入 Markdown / HTML 内容",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = brand.editorHint,
+                            )
+                        }
+                        innerTextField()
+                    },
                 )
             }
         }

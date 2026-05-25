@@ -2,7 +2,6 @@ package com.paiban.helper.domain.render
 
 import com.paiban.helper.domain.template.ArticleTemplate
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Tag
 

@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.paiban.helper.data.repository.AiSettingsRepository
 import com.paiban.helper.domain.ai.AiChatRepository
-import com.paiban.helper.domain.ai.DeepSeekRequestException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException

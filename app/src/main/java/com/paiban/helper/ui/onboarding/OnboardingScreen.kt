@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.onboarding
+﻿package com.paiban.helper.ui.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,8 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -54,8 +52,7 @@ fun OnboardingScreen(
             onClick = onFinish,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 24.dp)
-                .semantics { contentDescription = "完成首次使用引导" },
+                .padding(bottom = 24.dp),
         ) {
             Text("开始使用")
         }

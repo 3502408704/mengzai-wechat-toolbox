@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -34,6 +33,7 @@ import com.paiban.helper.ui.history.HistoryRoute
 import com.paiban.helper.ui.preview.PreviewRoute
 import com.paiban.helper.ui.preview.PreviewRouteSource
 import com.paiban.helper.ui.settings.SettingsRoute
+import com.paiban.helper.ui.settings.HelpScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,4 +163,6 @@ private fun AppDestination.icon() = when (this) {
     AppDestination.AiAssistant -> Icons.Outlined.Edit
     AppDestination.PreviewEditor -> Icons.Outlined.Edit
     AppDestination.PreviewHistory -> Icons.Outlined.History
+    AppDestination.Help -> Icons.Outlined.Settings
 }
+

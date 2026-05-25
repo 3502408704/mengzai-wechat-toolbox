@@ -1,28 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">排版助手</string>
-    <string name="preview_button">预览</string>
-    <string name="copy_preview_button">复制预览内容到剪贴板</string>
-    <string name="copy_source_button">复制源码</string>
-    <string name="import_file_button">导入文件</string>
-    <string name="undo_button">撤销编辑</string>
-    <string name="redo_button">重做编辑</string>
-    <string name="new_draft_button">新建草稿</string>
-    <string name="history_tab">历史</string>
-    <string name="editor_tab">编辑</string>
-    <string name="settings_tab">设置</string>
-    <string name="line_numbers">行号</string>
-    <string name="markdown_toolbar">Markdown 工具栏</string>
-    <string name="content_description_editor">代码编辑器</string>
-    <string name="content_description_preview">预览内容</string>
-    <string name="content_description_settings">设置页面</string>
-    <string name="clipboard_detected">检测到排版内容，是否导入到编辑器？</string>
-    <string name="paste_to_editor">粘贴</string>
-    <string name="ignore">忽略</string>
-    <string name="export_html">导出 HTML</string>
-    <string name="export_txt">导出 TXT</string>
-    <string name="share">分享</string>
-    <string name="theme_follow_system">跟随系统</string>
-    <string name="theme_light">浅色</string>
-    <string name="theme_dark">深色</string>
+    <string name="app_name">梦子公众号排版工具</string>
 </resources>

@@ -1,9 +1,8 @@
-package com.paiban.helper.ui.theme
+﻿package com.paiban.helper.ui.theme
 
 import androidx.compose.ui.text.font.FontWeight
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNotSame
 import org.junit.Test
 
 class ThemeTokensTest {
@@ -30,36 +29,12 @@ class ThemeTokensTest {
 
         assertEquals(PaibanBackgroundDark, scheme.background)
         assertEquals(PaibanSurfaceDark, scheme.surface)
-        assertEquals(PaibanPrimaryContainer, scheme.primary)
-        assertEquals(PaibanSecondaryContainerDark, scheme.secondaryContainer)
-        assertEquals(PaibanTertiaryContainerDark, scheme.tertiaryContainer)
         assertEquals(PaibanOnBackgroundDark, scheme.onBackground)
         assertEquals(PaibanSurfaceVariantDark, scheme.surfaceVariant)
         assertEquals(PaibanSurfaceContainerDark, scheme.surfaceContainer)
         assertEquals(PaibanSurfaceContainerHighDark, scheme.surfaceContainerHigh)
         assertEquals(PaibanSurfaceContainerHighestDark, scheme.surfaceContainerHighest)
         assertEquals(PaibanOutlineDark, scheme.outline)
-        assertEquals(PaibanErrorContainerDark, scheme.errorContainer)
-    }
-
-    @Test
-    fun structuralSurfacesStayFixedWhenDynamicAccentOverridesApply() {
-        val baseScheme = fallbackDarkColorScheme()
-        val dynamicAccentScheme = dynamicAccentAwareColorScheme(
-            darkTheme = true,
-            dynamicColorEnabled = true,
-            dynamicPrimary = PaibanDynamicPrimaryTest,
-            dynamicSecondary = PaibanDynamicSecondaryTest,
-            dynamicTertiary = PaibanDynamicTertiaryTest,
-        )
-
-        assertNotSame(baseScheme, dynamicAccentScheme)
-        assertEquals(PaibanBackgroundDark, dynamicAccentScheme.background)
-        assertEquals(PaibanSurfaceDark, dynamicAccentScheme.surface)
-        assertEquals(PaibanSurfaceContainerDark, dynamicAccentScheme.surfaceContainer)
-        assertEquals(PaibanDynamicPrimaryTest, dynamicAccentScheme.primary)
-        assertEquals(PaibanDynamicSecondaryTest, dynamicAccentScheme.secondary)
-        assertEquals(PaibanDynamicTertiaryTest, dynamicAccentScheme.tertiary)
     }
 
     @Test

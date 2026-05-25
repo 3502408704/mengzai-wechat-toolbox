@@ -144,6 +144,7 @@ fun EditorScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { AccessibleSnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -215,9 +216,6 @@ fun EditorScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        AccessibleSnackbarHost(hostState = snackbarHostState)
-    }
 }
 
 private fun readTextFromUri(ctx: android.content.Context, uri: Uri, mgr: ImportExportManager): String? {

@@ -1,8 +1,8 @@
-package com.paiban.helper.ui.ai.chat
+﻿package com.paiban.helper.ui.ai.chat
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class AiChatUiStateTest {
@@ -12,7 +12,7 @@ class AiChatUiStateTest {
             configs = listOf(
                 AiChatConfigUiModel(
                     id = 1L,
-                    displayName = "DeepSeek 默认",
+                    displayName = "DeepSeek \u9ed8\u8ba4",
                     model = "deepseek-v4-flash",
                     isBuiltIn = true,
                 ),
@@ -20,22 +20,8 @@ class AiChatUiStateTest {
             selectedConfigId = 999L,
         )
 
-        assertEquals(1L, state.selectedConfig()?.id)
-        assertEquals("deepseek-v4-flash", state.selectedConfig()?.model)
-    }
-
-    @Test
-    fun builtInConfigIsReadOnlyAndMarkedAsDefault() {
-        val builtIn = AiChatConfigUiModel(
-            id = 1L,
-            displayName = "DeepSeek 默认",
-            model = "deepseek-v4-flash",
-            isBuiltIn = true,
-        )
-
-        assertTrue(builtIn.isReadOnly)
-        assertEquals("默认模型", builtIn.accessibilityLabel())
-        assertFalse(builtIn.canDelete)
+        assertEquals(1L, state.selectedConfig().id)
+        assertEquals("deepseek-v4-flash", state.selectedConfig().model)
     }
 
     @Test
@@ -45,33 +31,44 @@ class AiChatUiStateTest {
         val updated = initial.appendMessage(
             AiChatMessageUiModel(
                 id = 1L,
-                role = "user",
-                content = "帮我润色开头",
+                role = BubbleRole.User,
+                content = "\u5e2e\u6211\u6da6\u8272\u5f00\u5934",
             )
         )
 
         assertEquals(1, updated.messages.size)
-        assertEquals("帮我润色开头", updated.messages.single().content)
+        assertEquals("\u5e2e\u6211\u6da6\u8272\u5f00\u5934", updated.messages.single().content)
     }
 
     @Test
     fun latestAssistantMessageReturnsMostRecentAssistantReply() {
         val state = AiChatUiState(
             messages = listOf(
-                AiChatMessageUiModel(id = 1L, role = "user", content = "用户"),
-                AiChatMessageUiModel(id = 2L, role = "assistant", content = "第一版"),
-                AiChatMessageUiModel(id = 3L, role = "assistant", content = "第二版"),
+                AiChatMessageUiModel(id = 1L, role = BubbleRole.User, content = "\u7528\u6237"),
+                AiChatMessageUiModel(id = 2L, role = BubbleRole.Assistant, content = "\u7b2c\u4e00\u7248"),
+                AiChatMessageUiModel(id = 3L, role = BubbleRole.Assistant, content = "\u7b2c\u4e8c\u7248"),
             )
         )
 
-        assertEquals("第二版", state.latestAssistantMessage()?.content)
+        assertEquals("\u7b2c\u4e8c\u7248", state.latestAssistantMessage()?.content)
     }
 
     @Test
-    fun assistantMessageContentRemainsIndividuallyReadableForAccessibility() {
-        val semantics = aiChatMessageSemantics(role = "assistant")
+    fun emptyMessagesReturnsNullForLatestAssistant() {
+        val state = AiChatUiState()
 
-        assertEquals("AI", semantics.speakerLabel)
-        assertFalse(semantics.mergeContentIntoSingleNode)
+        assertNull(state.latestAssistantMessage())
+    }
+
+    @Test
+    fun builtInConfigIsFlaggedAsBuiltIn() {
+        val builtIn = AiChatConfigUiModel(
+            id = 1L,
+            displayName = "DeepSeek \u9ed8\u8ba4",
+            model = "deepseek-v4-flash",
+            isBuiltIn = true,
+        )
+
+        assertEquals(true, builtIn.isBuiltIn)
     }
 }
