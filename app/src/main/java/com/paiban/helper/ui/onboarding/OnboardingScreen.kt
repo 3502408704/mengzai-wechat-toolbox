@@ -33,12 +33,13 @@ fun OnboardingScreen(
     ) {
         Spacer(modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top)))
         Spacer(modifier = Modifier.height(24.dp))
-        Text("欢迎使用排版助手", style = MaterialTheme.typography.headlineMedium)
+        Text("欢迎使用梦子公众号排版工具", style = MaterialTheme.typography.headlineMedium)
         listOf(
             "粘贴或输入 HTML / CSS / Markdown 内容。",
             "切换到预览页查看渲染效果并一键复制。",
             "历史记录会自动保存关键快照，避免误操作丢失。",
-            "AI 辅助将在后续实验室版本开放。",
+            "AI 辅助已上线，点击编辑页的“AI 编辑”按钮体验智能润色、扩写、摘要等功能。",
+            "更多说明，请查看“设置”“帮助”，包含完整的无障碍使用指南。",
         ).forEach { item ->
             Card(modifier = Modifier.fillMaxWidth()) {
                 Text(
