@@ -29,8 +29,8 @@ android {
         applicationId = "com.paiban.helper"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.81"
+        versionCode = 3
+        versionName = "1.0"
         buildConfigField("String", "DEEPSEEK_API_KEY", "\"$deepSeekApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -39,8 +39,18 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../release.jks")
+            storePassword = "paiban123"
+            keyAlias = "releasekey"
+            keyPassword = "paiban123"
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
