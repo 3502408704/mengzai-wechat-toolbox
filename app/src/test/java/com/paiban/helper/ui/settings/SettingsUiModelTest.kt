@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.settings
+﻿package com.paiban.helper.ui.settings
 
 import com.paiban.helper.data.preferences.ThemeMode
 import org.junit.Assert.assertEquals
@@ -60,5 +60,40 @@ class SettingsUiModelTest {
 
         assertEquals("开发者模式", row.title)
         assertFalse(row.checked)
+    }
+
+    @Test
+    fun editorSectionContainsEditorExperienceInfoRow() {
+        val sections = buildSettingsSections(SettingsUiState())
+        val editor = sections.first { it.title == "编辑器" }
+        val row = editor.rows.single() as SettingsRowUiModel.Info
+
+        assertEquals("编辑体验", row.title)
+        assertTrue(row.description.isNotBlank())
+    }
+
+    @Test
+    fun labSectionContainsAiAssistantPlaceholder() {
+        val sections = buildSettingsSections(SettingsUiState())
+        val lab = sections.first { it.title == "实验室" }
+        val row = lab.rows.single() as SettingsRowUiModel.Info
+
+        assertEquals("AI 辅助编辑", row.title)
+        assertTrue(row.description.isNotBlank())
+    }
+
+    @Test
+    fun aboutSectionContainsHelpNavigationAndAppInfo() {
+        val sections = buildSettingsSections(SettingsUiState())
+        val about = sections.first { it.title == "关于" }
+
+        assertEquals(2, about.rows.size)
+
+        val navRow = about.rows[0] as SettingsRowUiModel.Navigation
+        assertEquals("使用指南", navRow.title)
+        assertTrue(navRow.description.isNotBlank())
+
+        val infoRow = about.rows[1] as SettingsRowUiModel.Info
+        assertEquals("梦崽公众号工具箱", infoRow.title)
     }
 }

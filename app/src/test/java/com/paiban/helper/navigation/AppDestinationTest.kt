@@ -1,4 +1,4 @@
-package com.paiban.helper.navigation
+﻿package com.paiban.helper.navigation
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -23,6 +23,7 @@ class AppDestinationTest {
                 "settings",
                 "preview/editor",
                 "preview/history/{historyId}",
+                "help",
             ),
             AppDestination.entries.map { it.route },
         )

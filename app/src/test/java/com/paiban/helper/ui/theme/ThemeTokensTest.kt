@@ -41,13 +41,13 @@ class ThemeTokensTest {
     fun paibanTypographyDefinesReadableHierarchy() {
         val typography = PaibanTypography
 
-        assertEquals(32, typography.headlineMedium.fontSize.value.toInt())
+        assertEquals(24, typography.headlineMedium.fontSize.value.toInt())
         assertEquals(FontWeight.SemiBold, typography.headlineMedium.fontWeight)
-        assertEquals(22, typography.titleLarge.fontSize.value.toInt())
+        assertEquals(20, typography.titleLarge.fontSize.value.toInt())
         assertEquals(FontWeight.Medium, typography.titleMedium.fontWeight)
         assertEquals(16, typography.bodyLarge.fontSize.value.toInt())
-        assertEquals(16, typography.bodyMedium.fontSize.value.toInt())
-        assertEquals(12, typography.labelSmall.fontSize.value.toInt())
+        assertEquals(14, typography.bodyMedium.fontSize.value.toInt())
+        assertEquals(11, typography.labelSmall.fontSize.value.toInt())
         assertNotEquals(typography.bodyMedium, typography.labelSmall)
     }
 }

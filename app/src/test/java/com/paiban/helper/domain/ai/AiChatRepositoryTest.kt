@@ -16,27 +16,27 @@ class AiChatRepositoryTest {
         val storageDir = createTempDir(prefix = "ai-chat-repository-test")
 
         val firstRepository = createRepository(storageDir)
-        val session = firstRepository.createSession(title = "\u8349\u7a3f")
-        firstRepository.appendUserMessage(session.id, "\u7b2c\u4e00\u6761")
-        firstRepository.appendAssistantMessage(session.id, "\u7b2c\u4e8c\u6761")
+        val session = firstRepository.createSession(title = "草稿")
+        firstRepository.appendUserMessage(session.id, "第一条")
+        firstRepository.appendAssistantMessage(session.id, "第二条")
 
         val secondRepository = createRepository(storageDir)
         val loadedSession = secondRepository.listSessions().first().first()
         val messages = secondRepository.loadMessages(loadedSession.id)
 
         assertEquals(session.id, loadedSession.id)
-        assertEquals("\u8349\u7a3f", loadedSession.title)
+        assertEquals("草稿", loadedSession.title)
         assertEquals(listOf(AiChatRole.User, AiChatRole.Assistant), messages.map { it.role })
-        assertEquals(listOf("\u7b2c\u4e00\u6761", "\u7b2c\u4e8c\u6761"), messages.map { it.content })
+        assertEquals(listOf("第一条", "第二条"), messages.map { it.content })
     }
 
     @Test
     fun accumulatorTracksCodeFenceStateAcrossChunkBoundaries() {
         val accumulator = AiMarkdownStreamAccumulator()
 
-        val first = accumulator.append("\u5148\u7ed9\u51fa\u793a\u4f8b\uff1a\n`kotlin\nfun main() {\n")
+        val first = accumulator.append("先给出示例：\n```kotlin\nfun main() {\n")
         val second = accumulator.append("    println(\"hello\")\n")
-        val third = accumulator.append("}\n`")
+        val third = accumulator.append("}\n```")
 
         assertTrue(first.isCodeBlockOpen)
         assertEquals("kotlin", first.activeCodeBlockLanguage)
@@ -59,9 +59,9 @@ class AiChatRepositoryTest {
             client = client,
             clock = { NEXT_TIMESTAMP++ },
         )
-        val session = repository.createSession(title = "\u6d41\u5f0f\u4f1a\u8bdd")
+        val session = repository.createSession(title = "流式会话")
 
-        repository.streamAssistantReply(session.id, "\u8bf7\u5199\u4e00\u4e2a\u51fd\u6570").first()
+        repository.streamAssistantReply(session.id, "请写一个函数").first()
 
         assertEquals(
             listOf(
@@ -70,7 +70,7 @@ class AiChatRepositoryTest {
             ),
             client.lastMessages.map { it.role },
         )
-        assertTrue(client.lastMessages.first().content.contains("\u53ea\u8d1f\u8d23\u516c\u4f17\u53f7\u6587\u7ae0"))
+        assertTrue(client.lastMessages.first().content.contains("只负责公众号文章"))
     }
 
     private fun createRepository(storageDir: File = createTempDirectory().toFile()): AiChatRepository {

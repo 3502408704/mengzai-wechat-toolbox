@@ -1,4 +1,4 @@
-package com.paiban.helper.ui.common
+﻿package com.paiban.helper.ui.common
 
 import com.paiban.helper.navigation.AppDestination
 import org.junit.Assert.assertEquals
@@ -8,7 +8,7 @@ class AppDestinationTest {
     @Test
     fun topLevelRoutesExposeLegacyPrimaryPagesAndPreviewChildren() {
         assertEquals(
-            listOf("editor", "history", "templates", "ai", "settings", "preview/editor", "preview/history/{historyId}"),
+            listOf("editor", "history", "templates", "ai", "settings", "preview/editor", "preview/history/{historyId}", "help"),
             AppDestination.entries.map { it.route },
         )
     }
@@ -22,7 +22,7 @@ class AppDestinationTest {
     @Test
     fun bottomNavigationRestoresPrimaryPageSetWithoutPreviewOrTemplates() {
         assertEquals(
-            listOf(AppDestination.Editor, AppDestination.History, AppDestination.AiAssistant, AppDestination.Settings),
+            listOf(AppDestination.Editor, AppDestination.History, AppDestination.Settings),
             AppDestination.topLevelDestinations(),
         )
     }

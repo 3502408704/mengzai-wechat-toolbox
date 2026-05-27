@@ -114,7 +114,24 @@ fun buildSettingsSections(state: SettingsUiState): List<SettingsSectionUiModel> 
                 )
             },
         ),
-        
+        SettingsSectionUiModel(
+            title = "编辑器",
+            rows = listOf(
+                SettingsRowUiModel.Info(
+                    title = "编辑体验",
+                    description = "编辑器默认延续当前草稿与排版设置，更多选项将在后续版本开放。",
+                ),
+            ),
+        ),
+        SettingsSectionUiModel(
+            title = "实验室",
+            rows = listOf(
+                SettingsRowUiModel.Info(
+                    title = "AI 辅助编辑",
+                    description = "当前版本仅保留导航占位，后续将开放本地原生 AI 辅助页。",
+                ),
+            ),
+        ),
         SettingsSectionUiModel(
             title = "开发者",
             rows = listOf(
@@ -127,21 +144,16 @@ fun buildSettingsSections(state: SettingsUiState): List<SettingsSectionUiModel> 
             ),
         ),
         SettingsSectionUiModel(
-            title = "帮助",
+            title = "关于",
             rows = listOf(
                 SettingsRowUiModel.Navigation(
                     title = "使用指南",
                     description = "快速入门、AI 辅助、历史记录与无障碍使用说明。",
                 ),
-            ),
-        ),
-        SettingsSectionUiModel(
-            title = "关于",
-            rows = listOf(
                 SettingsRowUiModel.Info(
                     title = "梦崽公众号工具箱",
                     description = "专注于 Markdown 编辑、预览与发布准备的本地工具。",
-                )
+                ),
             ),
         ),
     )
@@ -218,6 +230,7 @@ fun SettingsScreen(
                     onThemeModeSelected = onThemeModeSelected,
                     onDynamicColorChange = onDynamicColorChange,
                     onDeveloperModeChange = onDeveloperModeChange,
+                    onNavigateHelp = onNavigateHelp,
                 )
             }
 
@@ -230,13 +243,14 @@ fun SettingsScreen(
                 )
             }
 
-            // 开发者 + 关于
+            // 编辑器、实验室、开发者、关于
             items(sections.drop(1)) { section ->
                 SettingsSectionCard(
                     section = section,
                     onThemeModeSelected = onThemeModeSelected,
                     onDynamicColorChange = onDynamicColorChange,
                     onDeveloperModeChange = onDeveloperModeChange,
+                    onNavigateHelp = onNavigateHelp,
                 )
             }
 
@@ -537,9 +551,3 @@ private fun SettingsInfoRow(row: SettingsRowUiModel.Info) {
         }
     }
 }
-
-
-
-
-
-

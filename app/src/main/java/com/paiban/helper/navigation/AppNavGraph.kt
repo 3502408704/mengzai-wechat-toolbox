@@ -130,7 +130,14 @@ fun AppNavGraph(
                 )
             }
             composable(AppDestination.Settings.route) {
-                SettingsRoute()
+                SettingsRoute(
+                    onNavigateHelp = { navController.navigate(AppDestination.Help.route) },
+                )
+            }
+            composable(AppDestination.Help.route) {
+                HelpScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
             }
             composable(AppDestination.PreviewEditor.route) {
                 PreviewRoute(
@@ -165,4 +172,5 @@ private fun AppDestination.icon() = when (this) {
     AppDestination.PreviewHistory -> Icons.Outlined.History
     AppDestination.Help -> Icons.Outlined.Settings
 }
+
 
